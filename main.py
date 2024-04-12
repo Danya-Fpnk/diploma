@@ -1,29 +1,45 @@
 import tkinter
-import cv2
 import PIL.Image, PIL.ImageTk
-from display import model, class_names
-import cvzone
-import math
+
+from traffic_light import TrafficLight
+from video_utils import VideoCapture
 
 
 class App:
-    def __init__(self, window, window_title, video_sources=0):
-        self.cn_cnt = 2
-
+    def __init__(self, window, window_title, video_sources=['arrived_car.mp4', 'waiting_people.mp4']):
         self.window = window
         self.window.title(window_title)
-        self.video_sources = video_sources
 
-        self.vid = VideoCapture(video_sources)
+        self.canvas_width = 250
+        self.canvas_height = 325
+        self.vids = {
+            'left_car': VideoCapture(video_sources[0]),
+            'people': VideoCapture(video_sources[1]),
+            'right_car': VideoCapture(video_sources[0])
+        }
 
-        # Create 9 canvases, one for each video source
-        self.canvases = []
-        for vid in range(self.cn_cnt):
-            canvas = tkinter.Canvas(window, width=self.vid.width, height=self.vid.height)
-            canvas.pack()
-            self.canvases.append(canvas)
+        self.places = {
+            'left_car': [10, self.canvas_height+10],
+            'people': [self.canvas_width+10, 10],
+            'right_car': [self.canvas_width*2+10, self.canvas_height+10]
+        }
 
-        # After it is called once, the update method will be automatically called every delay milliseconds
+        self.canvases = {}
+        self.change_video_button = tkinter.Button(window, text="Change Left Car Video", command=self.change_left_car_video)
+        self.change_video_button.place(x=10, y=700)
+
+        for key in self.vids.keys():
+            canvas = tkinter.Canvas(self.window, width=self.canvas_width, height=self.canvas_height)
+            canvas.place(
+                x=self.places[key][0],
+                y=self.places[key][1],
+                width=self.canvas_width,
+                height=self.canvas_height
+            )
+            self.canvases[key] = canvas
+
+        TrafficLight(self.window)
+
         self.delay = 15
         self.update()
 
@@ -31,57 +47,23 @@ class App:
 
     def update(self):
         self.photos = []
-        for idx in range(self.cn_cnt):
+        for key in self.vids.keys():
             # Get a frame from the video source
-            ret, frame = self.vid.get_frame()
+            frame = self.vids[key].get_frame()
 
-            if ret:
-                photo = PIL.ImageTk.PhotoImage(image=PIL.Image.fromarray(frame))
-                self.canvases[idx].create_image(0, 0, image=photo, anchor=tkinter.NW)
-                self.photos.append(photo)
+            image = PIL.Image.fromarray(frame)
+            resized_image = image.resize((self.canvas_width, self.canvas_height), PIL.Image.LANCZOS)
+
+            photo = PIL.ImageTk.PhotoImage(image=resized_image)
+            self.canvases[key].create_image(0, 0, image=photo, anchor=tkinter.NW)
+            self.photos.append(photo)
 
         self.window.after(self.delay, self.update)
 
+    def change_left_car_video(self):
+        # Вызов set_vid для изменения видео на 'walking_people.mp4'
+        self.vids['left_car'].set_vid('walking_people.mp4')
 
-class VideoCapture:
-    def __init__(self, video_source=0):
-        # Open the video source
-        self.vid = cv2.VideoCapture(video_source)
-        self.vid.set(3, 100)
-        self.vid.set(4, 70)
-        if not self.vid.isOpened():
-            raise ValueError("Unable to open video source", video_source)
-
-        # Get video source width and height
-        self.width = self.vid.get(cv2.CAP_PROP_FRAME_WIDTH)
-        self.height = self.vid.get(cv2.CAP_PROP_FRAME_HEIGHT)
-
-    def get_frame(self):
-        if self.vid.isOpened():
-            ret, frame = self.vid.read()
-            results = model(frame, stream=True)
-            for r in results:
-                boxes = r.boxes
-                for box in boxes:
-                    x1, y1, x2, y2 = box.xyxy[0]
-                    x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
-                    print(x1, y1, x2, y2)
-                    cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 255), 3)
-
-                    conf = math.ceil((box.conf[0] * 100)) / 100
-                    cls = int(box.cls[0])
-                    cvzone.putTextRect(frame, f'{class_names[cls]}  {conf} ', (max(0, x1), max(35, y1)), scale=1,
-                                       thickness=1)
-                if ret:
-                    # Return a boolean success flag and the current frame converted to BGR
-                    return (ret, cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-                else:
-                    return (ret, None)
-
-    # Release the video source when the object is destroyed
-    def __del__(self):
-        if self.vid.isOpened():
-            self.vid.release()
-
-# Create a window and pass it to the Application object
-App(tkinter.Tk(), "Tkinter and OpenCV")
+if __name__ == "__main__":
+    # Create a window and pass it to the Application object
+    App(tkinter.Tk(), "Tkinter and OpenCV")

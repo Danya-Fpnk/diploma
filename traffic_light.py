@@ -2,24 +2,19 @@ from tkinter import *
 
 time_interval = 2000  # You can change this (Default = 2 Seconds)
 
-window = Tk()
-
 
 class TrafficLight():
 
-    def __init__(self):
+    def __init__(self, window):
+        self.window = window
         self.green_state = GreenState(self)
         self.yellow_state = YellowState(self)
         self.red_state = RedState(self)
         self.state = self.red_state
 
-        window.title("Traffic Light")
-
-        frame = Frame(window)
-        frame.pack()
         self.color = StringVar()
-        self.canvas = Canvas(window, width=120, height=350, bg="white")
-        self.canvas.pack()
+        self.canvas = Canvas(self.window, width=120, height=350, bg="blue")
+        self.canvas.place(x=260, y=260)
 
         self.oval_red = self.canvas.create_oval(10, 10, 110, 110, fill="white")
         self.oval_yellow = self.canvas.create_oval(10, 120, 110, 220, fill="white")
@@ -28,21 +23,19 @@ class TrafficLight():
         self.color.set('R')
         self.canvas.itemconfig(self.oval_red, fill="red")
 
-        window.after(0, self.gored)
-
-        window.mainloop()
+        self.window.after(0, self.gored)
 
     def gored(self):
         self.red_state.handle_request(self)
-        window.after(time_interval, self.gogreen)
+        self.window.after(time_interval, self.gogreen)
 
     def gogreen(self):
         self.green_state.handle_request(self)
-        window.after(time_interval, self.goyellow)
+        self.window.after(time_interval, self.goyellow)
 
     def goyellow(self):
         self.yellow_state.handle_request(self)
-        window.after(time_interval, self.gored)
+        self.window.after(time_interval, self.gored)
 
     def get_green_light_state(self):
         return self.green_state
@@ -115,6 +108,3 @@ class GreenState(State):
 
     def __str__(self):
         return 'Traffic light is on green.'
-
-
-tr = TrafficLight()
