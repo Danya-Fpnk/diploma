@@ -5,7 +5,7 @@ time_interval = 2000  # You can change this (Default = 2 Seconds)
 
 class TrafficLight():
 
-    def __init__(self, window):
+    def __init__(self, window, width=0, height=0, x=0, y=0):
         self.window = window
         self.green_state = GreenState(self)
         self.yellow_state = YellowState(self)
@@ -14,7 +14,7 @@ class TrafficLight():
 
         self.color = StringVar()
         self.canvas = Canvas(self.window, width=120, height=350, bg="blue")
-        self.canvas.place(x=260, y=260)
+        self.canvas.place(x=260, y=370)
 
         self.oval_red = self.canvas.create_oval(10, 10, 110, 110, fill="white")
         self.oval_yellow = self.canvas.create_oval(10, 120, 110, 220, fill="white")
