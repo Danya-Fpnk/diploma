@@ -1,6 +1,7 @@
 import tkinter
 import PIL.Image, PIL.ImageTk
 from traffic_light import TrafficLight
+from traffic_utils import sum_values_by_key_pattern
 from video_utils import VideoCapture
 
 
@@ -41,25 +42,34 @@ class App:
         TrafficLight(self.window)
 
         self.delay = 30
-        self.update()
+        self.update_video_frame()
 
         self.window.mainloop()
 
-    def update(self):
+    def get_intersection_stats(self, object_cnt):
+        people_count = sum_values_by_key_pattern(object_cnt, r'people')
+        car_count = sum_values_by_key_pattern(object_cnt, r'car')
+
+        return people_count / car_count if car_count != 0 else 1
+
+    def update_video_frame(self):
+        objects_cnt = {}
         for key in self.vids.keys():
-            # Get a frame from the video source
-            frame = self.vids[key].get_frame()
+            frame, object_cnt = self.vids[key].get_frame()
+            objects_cnt[key] = object_cnt
 
             image = PIL.Image.fromarray(frame)
             resized_image = image.resize((self.canvas_width, self.canvas_height), PIL.Image.LANCZOS)
 
-            # Convert the resized image to PhotoImage
             photo = PIL.ImageTk.PhotoImage(resized_image)
             self.canvases[key].create_image(0, 0, image=photo, anchor=tkinter.NW)
             self.photos[key] = photo
-        self.window.after(self.delay, self.update)
 
+        # self.update_traffic_light()
+        self.window.after(self.delay, self.update_video_frame)
 
+    def update_traffic_light(self):
+        pass
 
     def add_video_change_buttons(self, source=0):
         button_x = 10

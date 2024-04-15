@@ -13,7 +13,7 @@ class TrafficLight():
         self.state = self.red_state
 
         self.color = StringVar()
-        self.canvas = Canvas(self.window, width=120, height=350, bg="blue")
+        self.canvas = Canvas(self.window, width=120, height=335, bg="blue")
         self.canvas.place(x=260, y=370)
 
         self.oval_red = self.canvas.create_oval(10, 10, 110, 110, fill="white")
@@ -37,18 +37,6 @@ class TrafficLight():
         self.yellow_state.handle_request(self)
         self.window.after(time_interval, self.gored)
 
-    def get_green_light_state(self):
-        return self.green_state
-
-    def get_yellow_light_state(self):
-        return self.yellow_state
-
-    def get_red_light_state(self):
-        return self.red_state
-
-    def set_state(self, state):
-        self.state = state
-
     def __str__(self):
         return '{} {} {} {}'.format(self.green_state, self.yellow_state, self.red_state, self.state)
 
@@ -59,7 +47,7 @@ class State():
         pass
 
     def __str__(self):
-        return 'red'
+        return 'Abstract method'
 
 
 class RedState(State):
@@ -69,7 +57,7 @@ class RedState(State):
 
     def handle_request(self, refer):
         print('Wait for turning traffic light to green...')
-        self.traffic_light.set_state(self.traffic_light.get_green_light_state())
+        # self.traffic_light.set_state(self.traffic_light.get_green_light_state())
         refer.canvas.itemconfig(refer.oval_red, fill="red")
         refer.canvas.itemconfig(refer.oval_yellow, fill="white")
         refer.canvas.itemconfig(refer.oval_green, fill="white")
@@ -85,7 +73,7 @@ class YellowState(State):
 
     def handle_request(self, refer):
         print('Wait for turning traffic light to red...')
-        self.traffic_light.set_state(self.traffic_light.get_red_light_state())
+        # self.traffic_light.set_state(self.traffic_light.get_red_light_state()
         refer.canvas.itemconfig(refer.oval_yellow, fill="yellow")
         refer.canvas.itemconfig(refer.oval_red, fill="white")
         refer.canvas.itemconfig(refer.oval_green, fill="white")
@@ -101,7 +89,7 @@ class GreenState(State):
 
     def handle_request(self, refer):
         print('Wait for turning traffic light to yellow...')
-        self.traffic_light.set_state(self.traffic_light.get_yellow_light_state())
+        # self.traffic_light.set_state(self.traffic_light.get_yellow_light_state())
         refer.canvas.itemconfig(refer.oval_green, fill="green")
         refer.canvas.itemconfig(refer.oval_red, fill="white")
         refer.canvas.itemconfig(refer.oval_yellow, fill="white")
