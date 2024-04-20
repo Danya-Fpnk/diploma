@@ -5,7 +5,7 @@ import math
 
 
 class VideoCapture:
-    def __init__(self, video_source=0, width=None, height=None, speed=2):
+    def __init__(self, video_source=0, width=None, height=None, speed=3):
         self.vid = cv2.VideoCapture(video_source)
         if not self.vid.isOpened():
             raise ValueError("Unable to open video source", video_source)
@@ -21,7 +21,7 @@ class VideoCapture:
 
     def get_frame(self):
         while True:
-            object_cnt = 0
+            objects_cnt = 0
             if self.vid.isOpened():
                 ret, frame = self.vid.read()
                 self.frame_count += 1
@@ -44,8 +44,8 @@ class VideoCapture:
                         cls = int(box.cls[0])
                         cvzone.putTextRect(frame, f'{class_names[cls]}  {conf} ', (max(0, x1), max(35, y1)), scale=1,
                                            thickness=1)
-                        object_cnt += 1
-                return cv2.cvtColor(frame, cv2.COLOR_BGR2RGB), object_cnt
+                        objects_cnt += 1
+                return cv2.cvtColor(frame, cv2.COLOR_BGR2RGB), objects_cnt
 
     def set_vid(self, video_source=0):
         self.__del__()
