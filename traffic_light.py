@@ -4,75 +4,85 @@ from tkinter import *
 
 class TrafficLight():
 
-    def __init__(self, window, x, y, width, height, with_yellow_color=True):
+    def __init__(self, window):
         self.window = window
+        self.last_changed_at = datetime.now()
+        self.canvases = {}
+        self.with_yellow_color = {}
+        self.ovals = {}
+        # self.add_traffic_light(canvas_name, x, y, width, height, with_yellow_color=with_yellow_color)
+
+    def add_traffic_light(self, canvas_name, x, y, width, height, with_yellow_color=True):
         self.green_state = GreenState(self)
-        self.with_yellow_color = with_yellow_color
-        if with_yellow_color:
+        self.with_yellow_color[canvas_name] = with_yellow_color
+        if self.with_yellow_color[canvas_name]:
             self.yellow_state = YellowState(self)
         self.red_state = RedState(self)
-        self.width = width
-        self.height = height
 
-        self.last_changed_at = datetime.now()
+        self.canvases[canvas_name] = Canvas(self.window, width=width, height=height, bg="#003366")
+        self.canvases[canvas_name].place(x=x, y=y)
 
-        self.canvas = Canvas(window, width=self.width, height=self.height, bg="#003366")
-        self.canvas.place(x=x, y=y)
+        self.resize_ovals(canvas_name)
 
-        self.resize_ovals()
+        self.canvases[canvas_name].bind("<Configure>", lambda event, c=canvas_name: self.on_resize(event, c))
 
-        self.canvas.bind("<Configure>", self.on_resize)
 
-    def resize_ovals(self):
+
+    def resize_ovals(self, canvas_name):
         # Установка ширины и высоты кругов светофора равными для создания идеального круга
-        oval_size = self.canvas.winfo_width() * 0.75
-        x0 = (self.canvas.winfo_width() - oval_size) / 2
+        oval_size = self.canvases[canvas_name].winfo_width() * 0.75
+        x0 = (self.canvases[canvas_name].winfo_width() - oval_size) / 2
 
         # Расчет фиксированного отступа между кругами на основе размера круга
         spacing = oval_size * 0.1
 
         # Начальное положение первого круга
         y0 = spacing
+        y1 = y0 + oval_size + spacing
+        y2 = y1 + oval_size + spacing
 
-        self.ovals = {}
-        kw = {'fill': "white",'outline': "black"}
-        self.ovals['red'] = self.canvas.create_oval(x0, y0, x0 + oval_size, y0 + oval_size, **kw)
-        if self.with_yellow_color:
-            y1 = y0 + oval_size + spacing
-            self.ovals['yellow'] = self.canvas.create_oval(x0, y1, x0 + oval_size, y1 + oval_size, **kw)
-            y2 = y1 + oval_size + spacing
+
+        self.ovals[canvas_name] = {}
+        kw = {'fill': "white", 'outline': "black"}
+        # kw = {'outline': "black"}
+        self.ovals[canvas_name]['red'] = self.canvases[canvas_name].create_oval(x0, y0, x0 + oval_size, y0 + oval_size, **kw)
+        # self.ovals['red'] = self.canvases[canvas_name].create_oval(x0, y0, x0 + oval_size, y0 + oval_size, fill='red' , **kw)
+        if self.with_yellow_color[canvas_name]:
+            # self.ovals['yellow'] = self.canvases[canvas_name].create_oval(x0, y1, x0 + oval_size, y1 + oval_size, fill='yellow', **kw)
+            self.ovals[canvas_name]['yellow'] = self.canvases[canvas_name].create_oval(x0, y1, x0 + oval_size, y1 + oval_size, **kw)
         else:
-            y2 = y0 + oval_size + spacing
-        self.ovals['green'] = self.canvas.create_oval(x0, y2, x0 + oval_size, y2 + oval_size, **kw)
+            y2 = y1
+        # self.ovals['green'] = self.canvases[canvas_name].create_oval(x0, y2, x0 + oval_size, y2 + oval_size, fill='green', **kw)
+        self.ovals[canvas_name]['green'] = self.canvases[canvas_name].create_oval(x0, y2, x0 + oval_size, y2 + oval_size, **kw)
 
-    def on_resize(self, event):
-        # При изменении размера окна пересоздаем овалы
-        self.canvas.delete("all")
-        self.resize_ovals()
+    def on_resize(self, event, canvas_name):
+        self.canvases[canvas_name].delete("all")
+        self.resize_ovals(canvas_name)
 
     def gored(self):
-        self.change_color('green', 'red', self.red_state.handle_request)
+        self.change_color('green', self.red_state.handle_request)
 
     def gogreen(self):
-        self.change_color('red','green', self.green_state.handle_request)
+        self.change_color('red', self.green_state.handle_request)
 
-    def __goyellow(self, handle_request, refer):
-        time_interval = 3000
-        self.yellow_state.handle_request(self)
-        self.window.after(time_interval, handle_request, self)
+    def change_color(self, from_color, handle_request, blink_cnt=1):
+        for canvas_name in self.canvases.keys():
+            if blink_cnt <= 6 or (self.with_yellow_color[canvas_name] is False and blink_cnt <= 12):
+                if self.with_yellow_color[canvas_name] is False:
+                    print('Changed color', canvas_name, 'to', from_color if blink_cnt % 2 else "white")
+                self.canvases[canvas_name].itemconfig(
+                    self.ovals[canvas_name][from_color], fill=from_color if blink_cnt % 2 else "white"
+                )
+            elif self.with_yellow_color[canvas_name] and blink_cnt == 7:
+                self.yellow_state.handle_request(self)
 
-    def change_color(self, from_color, to_color, handle_request, blink_cnt=1):
-        if blink_cnt <= 6 or (self.with_yellow_color == False and blink_cnt <= 12):
-            self.canvas.itemconfig(self.ovals[from_color], fill="white" if blink_cnt % 2 else from_color)
-            self.window.after(500, self.change_color, from_color, to_color, handle_request, blink_cnt + 1)
-        elif self.with_yellow_color:
-            self.canvas.itemconfig(self.ovals[from_color], fill=from_color)
-            self.window.after(500, self.__goyellow, handle_request, self)
+        if blink_cnt <= 12:
+            self.window.after(500, self.change_color, from_color, handle_request, blink_cnt + 1)
         else:
-            self.window.after(1, handle_request, self)
+            self.window.after(500, handle_request, self)
 
-    def __str__(self):
-        return '{} {} {} {}'.format(self.green_state, self.yellow_state, self.red_state, self.state)
+    # def __str__(self):
+    #     return '{} {} {} {}'.format(self.green_state, self.yellow_state, self.red_state, self.state)
 
 
 class State():
@@ -91,11 +101,11 @@ class RedState(State):
 
     def handle_request(self, refer):
         print('Wait for turning traffic light to green...')
-        # self.traffic_light.set_state(self.traffic_light.get_green_light_state())
-        refer.canvas.itemconfig(refer.ovals['red'], fill="red")
-        if refer.with_yellow_color:
-            refer.canvas.itemconfig(refer.ovals['yellow'], fill="white")
-        refer.canvas.itemconfig(refer.ovals['green'], fill="white")
+        for canvas_name in refer.canvases.keys():
+            refer.canvases[canvas_name].itemconfig(refer.ovals[canvas_name]['red'], fill="red")
+            if refer.with_yellow_color[canvas_name]:
+                refer.canvases[canvas_name].itemconfig(refer.ovals[canvas_name]['yellow'], fill="white")
+            refer.canvases[canvas_name].itemconfig(refer.ovals[canvas_name]['green'], fill="white")
 
     def __str__(self):
         return 'Traffic light is on red.'
@@ -108,10 +118,11 @@ class YellowState(State):
 
     def handle_request(self, refer):
         print('Wait for turning traffic light to red...')
-        # self.traffic_light.set_state(self.traffic_light.get_red_light_state()
-        refer.canvas.itemconfig(refer.ovals['red'], fill="white")
-        refer.canvas.itemconfig(refer.ovals['yellow'], fill="yellow")
-        refer.canvas.itemconfig(refer.ovals['green'], fill="white")
+        for canvas_name in refer.canvases.keys():
+            if refer.with_yellow_color[canvas_name]:
+                refer.canvases[canvas_name].itemconfig(refer.ovals[canvas_name]['red'], fill="white")
+                refer.canvases[canvas_name].itemconfig(refer.ovals[canvas_name]['yellow'], fill="yellow")
+                refer.canvases[canvas_name].itemconfig(refer.ovals[canvas_name]['green'], fill="white")
 
     def __str__(self):
         return 'Traffic light is on yellow.'
@@ -123,12 +134,11 @@ class GreenState(State):
         self.traffic_light = traffic_light
 
     def handle_request(self, refer):
-        print('Wait for turning traffic light to yellow...')
-        # self.traffic_light.set_state(self.traffic_light.get_yellow_light_state())
-        refer.canvas.itemconfig(refer.ovals['red'], fill="white")
-        if refer.with_yellow_color:
-            refer.canvas.itemconfig(refer.ovals['yellow'], fill="white")
-        refer.canvas.itemconfig(refer.ovals['green'], fill="green")
+        for canvas_name in refer.canvases.keys():
+            refer.canvases[canvas_name].itemconfig(refer.ovals[canvas_name]['red'], fill="white")
+            if refer.with_yellow_color[canvas_name]:
+                refer.canvases[canvas_name].itemconfig(refer.ovals[canvas_name]['yellow'], fill="white")
+            refer.canvases[canvas_name].itemconfig(refer.ovals[canvas_name]['green'], fill="green")
 
     def __str__(self):
         return 'Traffic light is on green.'

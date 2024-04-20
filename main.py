@@ -19,6 +19,8 @@ class App:
 
         self.canvas_width = 200
         self.canvas_height = 290
+        self.x_traffic_light = TrafficLight(self.window)
+        self.y_traffic_light = TrafficLight(self.window)
         self.models = {
             'car_x1': {
                 'video': VideoCapture(video_sources[0]),
@@ -27,7 +29,7 @@ class App:
                     self.add_video_change_buttons(5, 360, 'Play arrived car', 'car_x1', 'arrived_car.mp4'),
                     self.add_video_change_buttons(5, 390, 'Play clear road', 'car_x1', 'clear_road.mp4')
                 ],
-                'traffic_light': TrafficLight(self.window, 380, 420, 70, 190),
+                'traffic_light': self.x_traffic_light.add_traffic_light('car_x1', 380, 420, 70, 190),
                 'oriented': 'x'
             },
             'car_x2': {
@@ -37,7 +39,7 @@ class App:
                     self.add_video_change_buttons(1550, 360, 'Play arrived car', 'car_x2', 'arrived_car.mp4'),
                     self.add_video_change_buttons(1550, 390, 'Play clear road', 'car_x2', 'clear_road.mp4')
                 ],
-                'traffic_light': TrafficLight(self.window, 1250, 325, 70, 190),
+                'traffic_light': self.x_traffic_light.add_traffic_light('car_x2', 1250, 325, 70, 190),
                 'oriented': 'x'
             },
             'car_y1': {
@@ -47,7 +49,7 @@ class App:
                     self.add_video_change_buttons(850, 60, 'Play arrived car', 'car_x1', 'arrived_car.mp4'),
                     self.add_video_change_buttons(850, 90, 'Play clear road', 'car_x1', 'clear_road.mp4')
                 ],
-                'traffic_light': TrafficLight(self.window, 570, 170, 70, 190),
+                'traffic_light': self.y_traffic_light.add_traffic_light('car_y1', 570, 170, 70, 190),
                 'oriented': 'y'
             },
             'car_y2': {
@@ -57,7 +59,7 @@ class App:
                     self.add_video_change_buttons(850, 870, 'Play arrived car', 'car_x1', 'arrived_car.mp4'),
                     self.add_video_change_buttons(850, 900, 'Play clear road', 'car_x1', 'clear_road.mp4')
                 ],
-                'traffic_light': TrafficLight(self.window, 850, 600, 70, 190),
+                'traffic_light': self.y_traffic_light.add_traffic_light('car_y2', 850, 600, 70, 190),
                 'oriented': 'y'
             },
             'people_x1y1': {
@@ -67,7 +69,7 @@ class App:
                     self.add_video_change_buttons(5, 60, 'Play clear pavement', 'people_x1y1','clear_pavement.mp4'),
                     self.add_video_change_buttons(5, 90, 'Play waiting people', 'people_x1y1', 'waiting_people.mp4')
                 ],
-                'traffic_light': TrafficLight(self.window, 400, 130, 70, 130, False),
+                'traffic_light': self.y_traffic_light.add_traffic_light('people_x1y1', 400, 130, 70, 130, False),
                 'oriented': 'y'
             },
             # 'people_x2y1': {
@@ -101,11 +103,10 @@ class App:
             #     ]
             # },
         }
-        for model in self.models.values():
-            if model['oriented'] == 'y':
-                model['traffic_light'].gored()
-            else:
-                model['traffic_light'].gogreen()
+        # self.y_traffic_light.gogreen()
+        # self.x_traffic_light.gored()
+        self.y_traffic_light.gored()
+        self.x_traffic_light.gogreen()
 
         self.photos = {}
 
