@@ -32,9 +32,9 @@ class TrafficLight():
         y2 = y1 + oval_size + spacing
 
         self.ovals = {
-            'red': self.canvas.create_oval(x0, y0, x0 + oval_size, y0 + oval_size, fill="red", outline="black"),
-            'yellow': self.canvas.create_oval(x0, y1, x0 + oval_size, y1 + oval_size, fill="yellow", outline="black"),
-            'green': self.canvas.create_oval(x0, y2, x0 + oval_size, y2 + oval_size, fill="green", outline="black")
+            'red': self.canvas.create_oval(x0, y0, x0 + oval_size, y0 + oval_size, fill="white", outline="black"),
+            'yellow': self.canvas.create_oval(x0, y1, x0 + oval_size, y1 + oval_size, fill="white", outline="black"),
+            'green': self.canvas.create_oval(x0, y2, x0 + oval_size, y2 + oval_size, fill="white", outline="black")
         }
 
     def on_resize(self, event):

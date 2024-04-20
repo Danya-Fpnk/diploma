@@ -7,47 +7,86 @@ from video_utils import VideoCapture
 
 
 class App:
-    def __init__(self, window, window_title, video_sources=['arrived_car.mp4', 'waiting_people.mp4']):
+    def __init__(
+            self,
+            window,
+            window_title,
+            video_sources=['arrived_car.mp4', 'waiting_people.mp4', 'clear_pavement.mp4', 'clear_road.mp4']
+    ):
         self.window = window
         self.window.title(window_title)
         self.window.geometry("1800x1100")
 
-        self.canvas_width = 250
-        self.canvas_height = 325
+        self.canvas_width = 200
+        self.canvas_height = 290
         self.vids = {
-            'left_car': VideoCapture(video_sources[0]),
-            'people': VideoCapture(video_sources[1]),
-            # 'right_car': VideoCapture(video_sources[0])
+            'car_x1': {
+                'video': VideoCapture(video_sources[0]),
+                'places': [150, 325],
+            },
+            'car_x2': {
+                'video': VideoCapture(video_sources[3]),
+                'places': [1350, 325],
+            },
+            'car_y1': {
+                'video': VideoCapture(video_sources[3]),
+                'places': [650, 10],
+            },
+            'car_y2': {
+                'video': VideoCapture(video_sources[3]),
+                'places': [650, 700],
+            },
+            'people_x1y1': {
+                'video': VideoCapture(video_sources[2]),
+                'places': [150, 10],
+            },
+            'people_x2y1': {
+                'video': VideoCapture(video_sources[2]),
+                'places': [1350, 10],
+            },
+            'people_x1y2': {
+                'video': VideoCapture(video_sources[1]),
+                'places': [150, 700],
+            },
+            'people_x2y2': {
+                'video': VideoCapture(video_sources[2]),
+                'places': [1350, 700],
+            },
         }
+        self.car_traffic_lights = {
+            'x': {
+                'x1' :TrafficLight(self.window, 360, 420, 70, 190),
+                'x2' :TrafficLight(self.window, 1250, 325, 70, 190),
+            },
+            'y': {
+                'y1' :TrafficLight(self.window, 570, 170, 70, 190),
+                'y2' :TrafficLight(self.window, 850, 600, 70, 190),
+            }
+        }
+        for traffic_light in self.car_traffic_lights['x'].values():
+            traffic_light.gogreen()
 
-        self.places = {
-            'left_car': [self.canvas_width + 10, 10],
-            'people': [10, self.canvas_height + 10],
-            # 'right_car': [self.canvas_width*2+10, self.canvas_height+10]
-        }
+        for traffic_light in self.car_traffic_lights['y'].values():
+            traffic_light.gored()
+
+
+        # self.add_video_change_buttons(10, 700, 'Play clear pavement', 'people', 'clear_pavement.mp4')
+        # self.add_video_change_buttons(10, 730, 'Play waiting people', 'people', 'waiting_people.mp4')
+        #
+        # self.add_video_change_buttons(500, 30, 'Play arrived car', 'left_car', 'arrived_car.mp4')
+        # self.add_video_change_buttons(500, 60, 'Play clear road', 'left_car', 'clear_road.mp4')
+
         self.photos = {}
         self.last_red = datetime.now()
         self.last_green = datetime.now()
-        self.car_traffic_lights = {
-            'x1' :TrafficLight(self.window, 360, 470, 70, 190),
-            'x2' :TrafficLight(self.window, 1000, 300, 70, 190),
-            'y1' :TrafficLight(self.window, 500, 170, 70, 190),
-            'y2' :TrafficLight(self.window, 800, 570, 70, 190),
-        }
-        # self.traffic_light.gogreen()
 
         self.canvases = {}
-        self.add_video_change_buttons(10, 700, 'Play clear pavement', 'people', 'clear_pavement.mp4')
-        self.add_video_change_buttons(10, 730, 'Play waiting people', 'people', 'waiting_people.mp4')
-
-        self.add_video_change_buttons(500, 30, 'Play arrived car', 'left_car', 'arrived_car.mp4')
-        self.add_video_change_buttons(500, 60, 'Play clear road', 'left_car', 'clear_road.mp4')
 
         for key in self.vids.keys():
             canvas = tkinter.Canvas(self.window, width=self.canvas_width, height=self.canvas_height)
             canvas.place(
-                x=self.places[key][0],
-                y=self.places[key][1],
+                x=self.vids[key]['places'][0],
+                y=self.vids[key]['places'][1],
                 width=self.canvas_width,
                 height=self.canvas_height
             )
@@ -61,7 +100,7 @@ class App:
     def update_video_frame(self):
         objects_cnt = {}
         for key in self.vids.keys():
-            frame, object_cnt = self.vids[key].get_frame()
+            frame, object_cnt = self.vids[key]['video'].get_frame()
             objects_cnt[key] = object_cnt
 
             image = PIL.Image.fromarray(frame)
@@ -71,7 +110,7 @@ class App:
             self.canvases[key].create_image(0, 0, image=photo, anchor=tkinter.NW)
             self.photos[key] = photo
 
-        self.update_traffic_light(objects_cnt)
+        # self.update_traffic_light(objects_cnt)
         self.window.after(self.delay, self.update_video_frame)
 
     def update_traffic_light(self, objects_cnt):
@@ -96,7 +135,7 @@ class App:
 
     def change_video_source(self, video_key, new_source):
         if video_key in self.vids:
-            self.vids[video_key].set_vid(new_source)
+            self.vids[video_key]['video'].set_vid(new_source)
         else:
             print(f"No video source found for key: {video_key}")
 

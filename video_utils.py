@@ -5,7 +5,7 @@ import math
 
 
 class VideoCapture:
-    def __init__(self, video_source=0, width=None, height=None, speed=3):
+    def __init__(self, video_source=0, width=None, height=None, speed=9):
         self.vid = cv2.VideoCapture(video_source)
         if not self.vid.isOpened():
             raise ValueError("Unable to open video source", video_source)
