@@ -15,18 +15,26 @@ class App:
     ):
         self.window = window
         self.window.title(window_title)
-        self.window.geometry("1800x1100")
+        self.window.geometry("1700x1100")
 
         self.canvas_width = 200
         self.canvas_height = 290
         self.vids = {
             'car_x1': {
                 'video': VideoCapture(video_sources[0]),
-                'places': [150, 325],
+                'places': [170, 325],
+                'buttons': [
+                    self.add_video_change_buttons(5, 360, 'Play arrived car', 'car_x1', 'arrived_car.mp4'),
+                    self.add_video_change_buttons(5, 390, 'Play clear road', 'car_x1', 'clear_road.mp4')
+                ]
             },
             'car_x2': {
                 'video': VideoCapture(video_sources[3]),
                 'places': [1350, 325],
+                'buttons': [
+                    self.add_video_change_buttons(1550, 360, 'Play arrived car', 'car_x2', 'arrived_car.mp4'),
+                    self.add_video_change_buttons(1550, 390, 'Play clear road', 'car_x2', 'clear_road.mp4')
+                ]
             },
             'car_y1': {
                 'video': VideoCapture(video_sources[3]),
@@ -38,7 +46,11 @@ class App:
             },
             'people_x1y1': {
                 'video': VideoCapture(video_sources[2]),
-                'places': [150, 10],
+                'places': [170, 10],
+                'buttons': [
+                    self.add_video_change_buttons(5, 60, 'Play clear pavement', 'people_x1y1', 'clear_pavement.mp4'),
+                    self.add_video_change_buttons(5, 90, 'Play waiting people', 'people_x1y1', 'waiting_people.mp4')
+                ]
             },
             'people_x2y1': {
                 'video': VideoCapture(video_sources[2]),
@@ -46,7 +58,7 @@ class App:
             },
             'people_x1y2': {
                 'video': VideoCapture(video_sources[1]),
-                'places': [150, 700],
+                'places': [170, 700],
             },
             'people_x2y2': {
                 'video': VideoCapture(video_sources[2]),
@@ -55,7 +67,7 @@ class App:
         }
         self.car_traffic_lights = {
             'x': {
-                'x1' :TrafficLight(self.window, 360, 420, 70, 190),
+                'x1' :TrafficLight(self.window, 380, 420, 70, 190),
                 'x2' :TrafficLight(self.window, 1250, 325, 70, 190),
             },
             'y': {
