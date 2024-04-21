@@ -46,8 +46,8 @@ class App:
                 'video': VideoCapture(video_sources[3]),
                 'places': [650, 10],
                 'buttons': [
-                    self.add_video_change_buttons(850, 60, 'Play arrived car', 'car_x1', 'arrived_car.mp4'),
-                    self.add_video_change_buttons(850, 90, 'Play clear road', 'car_x1', 'clear_road.mp4')
+                    self.add_video_change_buttons(850, 60, 'Play arrived car', 'car_y1', 'arrived_car.mp4'),
+                    self.add_video_change_buttons(850, 90, 'Play clear road', 'car_y1', 'clear_road.mp4')
                 ],
                 'traffic_light': self.y_traffic_light.add_traffic_light('car_y1', 570, 170, 70, 190),
                 'oriented': 'y'
@@ -56,8 +56,8 @@ class App:
                 'video': VideoCapture(video_sources[3]),
                 'places': [650, 700],
                 'buttons': [
-                    self.add_video_change_buttons(850, 870, 'Play arrived car', 'car_x1', 'arrived_car.mp4'),
-                    self.add_video_change_buttons(850, 900, 'Play clear road', 'car_x1', 'clear_road.mp4')
+                    self.add_video_change_buttons(850, 870, 'Play arrived car', 'car_y2', 'arrived_car.mp4'),
+                    self.add_video_change_buttons(850, 900, 'Play clear road', 'car_y2', 'clear_road.mp4')
                 ],
                 'traffic_light': self.y_traffic_light.add_traffic_light('car_y2', 850, 600, 70, 190),
                 'oriented': 'y'
@@ -128,7 +128,7 @@ class App:
         objects_cnt = {}
         for model_key, model in self.models.items():
             frame, object_cnt = model['video'].get_frame()
-            objects_cnt[model['oriented']] = object_cnt + objects_cnt.get('oriented', 0)
+            objects_cnt[model['oriented']] = object_cnt + objects_cnt.get(model['oriented'], 0)
 
             image = PIL.Image.fromarray(frame)
             resized_image = image.resize((self.canvas_width, self.canvas_height), PIL.Image.LANCZOS)
@@ -137,23 +137,18 @@ class App:
             self.canvases[model_key].create_image(0, 0, image=photo, anchor=tkinter.NW)
             self.photos[model_key] = photo
 
-        # self.update_traffic_light(objects_cnt)
+        self.update_traffic_light(objects_cnt)
         self.window.after(self.delay, self.update_video_frame)
 
-    # def update_traffic_light(self, objects_cnt):
-    #     if (objects_cnt['y'] > 0
-    #             and objects_cnt['x'] > 0
-    #             and datetime.now() - self.last_red > timedelta(seconds=50))\
-    #             or (objects_cnt['x'] == 0
-    #                 and objects_cnt['y'] > 0
-    #                 and datetime.now() - self.last_red > timedelta(seconds=20)):
-    #         self.traffic_light.gored()
-    #         self.last_red = datetime.now()
-    #     elif (sum_values_by_key_pattern(objects_cnt, r'car') > 0
-    #           and datetime.now() - self.last_green > timedelta(seconds=20)):
-    #         self.traffic_light.gogreen()
-    #         self.last_green = datetime.now()
-        # else:
+    def update_traffic_light(self, objects_cnt):
+        if (objects_cnt['x'] > 0 and objects_cnt['y'] == 0
+            and datetime.now() - self.x_traffic_light.last_status_changed_at > timedelta(seconds=10)):
+            self.x_traffic_light.gogreen()
+            self.y_traffic_light.gored()
+        elif (objects_cnt['x'] == 0 and objects_cnt['y'] > 0
+            and datetime.now() - self.x_traffic_light.last_status_changed_at > timedelta(seconds=10)):
+            self.x_traffic_light.gored()
+            self.y_traffic_light.gogreen()
 
     def add_video_change_buttons(self, button_x, button_y, text, video_key, new_video_path):
         button = tkinter.Button(self.window, text=text,
