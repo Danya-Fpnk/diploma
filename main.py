@@ -103,8 +103,6 @@ class App:
             #     ]
             # },
         }
-        # self.y_traffic_light.gogreen()
-        # self.x_traffic_light.gored()
         self.y_traffic_light.gored()
         self.x_traffic_light.gogreen()
 
