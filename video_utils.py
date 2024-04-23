@@ -18,6 +18,12 @@ class VideoCapture:
         self.last_frame = None
         self.speed = speed
         self.frame_count = 0
+        self.prev_boxes = []
+
+    def calculate_distance(self, box1, box2):
+        center1 = ((box1[0] + box1[2]) / 2, (box1[1] + box1[3]) / 2)
+        center2 = ((box2[0] + box2[2]) / 2, (box2[1] + box2[3]) / 2)
+        return math.sqrt((center1[0] - center2[0]) ** 2 + (center1[1] - center2[1]) ** 2)
 
     def get_frame(self, top_left_x = 100, top_left_y = 100, bottom_right_x = 1600, bottom_right_y = 1600):
         while True:
@@ -27,31 +33,43 @@ class VideoCapture:
                 self.frame_count += 1
                 if not self.frame_count % self.speed == 0:
                     continue
+
                 if ret is True:
                     self.last_frame = frame
                 else:
                     frame = self.last_frame.copy()
+
                 # Определите координаты фрагмента для анализа
                 fragment = frame[top_left_y:bottom_right_y, top_left_x:bottom_right_x]
-                # Примените модель только к этому фрагменту
                 results = model(fragment, stream=True, classes=[0, 2])
+
+                current_boxes = []
                 for r in results:
-                    boxes = r.boxes
-                    for box in boxes:
-                        print(box)
-                        # Теперь координаты прямоугольника и текста будут относительными к фрагменту, а не к кадру
+                    for box in r.boxes:
+                        objects_cnt += 1
+
                         x1, y1, x2, y2 = box.xyxy[0]
                         x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
                         cv2.rectangle(fragment, (x1, y1), (x2, y2), (255, 0, 255), 3)
 
                         conf = math.ceil((box.conf[0] * 100)) / 100
                         cls = int(box.cls[0])
-                        # Используйте координаты относительно фрагмента для вывода текста
-                        cvzone.putTextRect(fragment, f'{class_names[cls]}  {conf} ', (max(0, x1), max(35, y1)), scale=1,
+
+                        is_waiting = False
+                        if self.prev_boxes:
+                            distances = [self.calculate_distance((x1, y1, x2, y2), prev) for prev in self.prev_boxes]
+                            if min(distances) < 1:
+                                is_waiting = True
+
+                        cvzone.putTextRect(fragment, f'is_waiting: {is_waiting}', (max(0, x1), max(35, y1)), scale=1,
                                            thickness=1)
-                        objects_cnt += 1
-                # Замените фрагмент обновленным фрагментом в кадре
+                        current_boxes.append((x1, y1, x2, y2))
+                print(current_boxes)
+                print(self.prev_boxes)
+                self.prev_boxes = current_boxes.copy()
+
                 frame[top_left_y:bottom_right_y, top_left_x:bottom_right_x] = fragment
+
                 return cv2.cvtColor(frame, cv2.COLOR_BGR2RGB), objects_cnt
 
     def set_vid(self, video_source=0):
