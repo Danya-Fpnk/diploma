@@ -53,11 +53,13 @@ class TrafficLight():
 
     def gored(self):
         if self.traffic_state != 'red':
+            self.last_status_changed_at = datetime.now()
             self.traffic_state = 'red'
             self.change_color('green', self.red_state.handle_request)
 
     def gogreen(self):
         if self.traffic_state != 'green':
+            self.last_status_changed_at = datetime.now()
             self.traffic_state = 'green'
             self.change_color('red', self.green_state.handle_request)
 

@@ -11,7 +11,7 @@ class App:
             self,
             window,
             window_title,
-            video_sources=['arrived_car.mp4', 'waiting_people.mp4', 'clear_pavement.mp4', 'clear_road.mp4']
+            video_sources=['waiting_car.mp4', 'waiting_people.mp4', 'clear_pavement.mp4', 'clear_road.mp4']
     ):
         self.window = window
         self.window.title(window_title)
@@ -26,7 +26,7 @@ class App:
                 'video': VideoCapture(video_sources[0]),
                 'places': [170, 325],
                 'buttons': [
-                    self.add_video_change_buttons(5, 360, 'Play arrived car', 'car_x1', 'arrived_car.mp4'),
+                    self.add_video_change_buttons(5, 360, 'Play waiting car', 'car_x1', 'waiting_car.mp4'),
                     self.add_video_change_buttons(5, 390, 'Play clear road', 'car_x1', 'clear_road.mp4')
                 ],
                 'traffic_light': self.x_traffic_light.add_traffic_light('car_x1', 380, 420, 70, 190),
@@ -36,7 +36,7 @@ class App:
                 'video': VideoCapture(video_sources[3]),
                 'places': [1350, 325],
                 'buttons': [
-                    self.add_video_change_buttons(1550, 360, 'Play arrived car', 'car_x2', 'arrived_car.mp4'),
+                    self.add_video_change_buttons(1550, 360, 'Play waiting car', 'car_x2', 'waiting_car.mp4'),
                     self.add_video_change_buttons(1550, 390, 'Play clear road', 'car_x2', 'clear_road.mp4')
                 ],
                 'traffic_light': self.x_traffic_light.add_traffic_light('car_x2', 1250, 325, 70, 190),
@@ -46,7 +46,7 @@ class App:
                 'video': VideoCapture(video_sources[3]),
                 'places': [650, 10],
                 'buttons': [
-                    self.add_video_change_buttons(850, 60, 'Play arrived car', 'car_y1', 'arrived_car.mp4'),
+                    self.add_video_change_buttons(850, 60, 'Play waiting car', 'car_y1', 'waiting_car.mp4'),
                     self.add_video_change_buttons(850, 90, 'Play clear road', 'car_y1', 'clear_road.mp4')
                 ],
                 'traffic_light': self.y_traffic_light.add_traffic_light('car_y1', 570, 170, 70, 190),
@@ -56,7 +56,7 @@ class App:
                 'video': VideoCapture(video_sources[3]),
                 'places': [650, 700],
                 'buttons': [
-                    self.add_video_change_buttons(850, 870, 'Play arrived car', 'car_y2', 'arrived_car.mp4'),
+                    self.add_video_change_buttons(850, 870, 'Play waiting car', 'car_y2', 'waiting_car.mp4'),
                     self.add_video_change_buttons(850, 900, 'Play clear road', 'car_y2', 'clear_road.mp4')
                 ],
                 'traffic_light': self.y_traffic_light.add_traffic_light('car_y2', 850, 600, 70, 190),
@@ -149,6 +149,14 @@ class App:
             and datetime.now() - self.x_traffic_light.last_status_changed_at > timedelta(seconds=10)):
             self.x_traffic_light.gored()
             self.y_traffic_light.gogreen()
+        elif (objects_cnt['x'] > 0 and objects_cnt['y'] > 0
+            and datetime.now() - self.x_traffic_light.last_status_changed_at > timedelta(seconds=30)):
+            if self.x_traffic_light.traffic_state == 'green':
+                self.x_traffic_light.gored()
+                self.y_traffic_light.gogreen()
+            elif self.x_traffic_light.traffic_state == 'red':
+                self.y_traffic_light.gored()
+                self.x_traffic_light.gogreen()
 
     def add_video_change_buttons(self, button_x, button_y, text, video_key, new_video_path):
         button = tkinter.Button(self.window, text=text,
