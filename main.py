@@ -69,7 +69,7 @@ class App:
             objects_cnt[model['oriented']] = object_cnt + objects_cnt.get(model['oriented'], 0)
 
             image = PIL.Image.fromarray(frame)
-            resized_image = image.resize((self.canvas_width, self.canvas_height), PIL.Image.LANCZOS)
+            resized_image = image.resize((self.canvas_width, self.canvas_height))
 
             photo = PIL.ImageTk.PhotoImage(resized_image)
             self.canvases[model_key].create_image(0, 0, image=photo, anchor=tkinter.NW)

@@ -9,7 +9,7 @@ models:
     oriented: 'x'
 
   car_x2:
-    video_source: video/clear_road.mp4
+    video_source: video/waiting_car.mp4
     places: [1350, 325]
     buttons:
       - {button_x: 1550, button_y: 360, label: 'Play waiting car', video_path: 'video/waiting_car.mp4'}
