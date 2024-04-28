@@ -3,11 +3,11 @@ import cv2
 
 
 def main(file_name):
-    generator = sv.get_video_frames_generator(f"{file_name}.mp4")
+    generator = sv.get_video_frames_generator(f"../video/{file_name}.mp4")
     iterator = iter(generator)
     frame = next(iterator)
 
-    cv2.imwrite(f"../frame_for_select_detected_zone/{file_name}.jpg", frame)
+    cv2.imwrite(f"{file_name}.jpg", frame)
 
 
 if __name__ == "__main__":
