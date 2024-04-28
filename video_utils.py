@@ -13,10 +13,8 @@ def load_video_areas(file_path):
         areas = yaml.safe_load(file)
 
     for video, data in areas['videos'].items():  # Iterate over key-value pairs
-        video_areas[f'video/{video}.mp4'] = {}
         video_areas[f'video/{video}.mp4'] = data
 
-    print(video_areas)
     return video_areas
 
 
@@ -30,9 +28,7 @@ class VideoCapture:
         if not self.vid.isOpened():
             raise ValueError("Unable to open video source", video_source)
 
-        self.video_areas = { key: np.array(value, np.int32) for key, value in video_areas[video_source].items() }
-        print(self.video_areas)
-        print('self.video_areas')
+        self.video_areas = {key: np.array(value, np.int32) for key, value in video_areas[video_source].items()}
 
         self.last_frame = None
         self.speed = speed
@@ -116,7 +112,6 @@ class VideoCapture:
                 print(inside_counts)
                 self.prev_boxes = current_boxes.copy()
 
-                # Отрисовываем полигоны
                 for area_key in self.video_areas.keys():
                     polygon = np.array(self.video_areas[area_key], dtype=np.int32)
                     if area_key == 'waiting_straight_area':
@@ -128,13 +123,12 @@ class VideoCapture:
 
                 return cv2.cvtColor(frame, cv2.COLOR_BGR2RGB), objects_cnt
 
-
     def set_vid(self, video_source=0):
         self.__del__()
         self.vid = cv2.VideoCapture(video_source)
         self.video_source = video_source
 
-        self.video_areas = { key: np.array(value, np.int32) for key, value in video_areas[video_source].items() }
+        self.video_areas = {key: np.array(value, np.int32) for key, value in video_areas[video_source].items()}
         if not self.vid.isOpened():
             raise ValueError("Unable to open video source", video_source)
 

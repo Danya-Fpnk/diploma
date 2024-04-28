@@ -1,7 +1,8 @@
 import tkinter
 import yaml
-import PIL.Image, PIL.ImageTk
+from PIL import Image, ImageTk
 from datetime import datetime, timedelta
+
 from traffic_light import TrafficLight
 from video_utils import VideoCapture
 
@@ -16,8 +17,7 @@ class App:
         self.window.title(window_title)
         self.window.geometry("1800x1100")
 
-        self.x_traffic_light = TrafficLight(self.window)
-        self.y_traffic_light = TrafficLight(self.window)
+        self.traffic_light = TrafficLight(self.window)
 
         with open('config.yml', 'r') as file:
             self.config = yaml.safe_load(file)
@@ -25,9 +25,7 @@ class App:
         self.canvas_width = self.config['canvas']['width']
         self.canvas_height = self.config['canvas']['height']
 
-        self.y_traffic_light.gored()
-        self.x_traffic_light.gogreen()
-
+        self.traffic_light.change_colors()
         self.photos = {}
 
         self.canvases = {}
@@ -54,10 +52,8 @@ class App:
                 'places': settings['places'],
                 'buttons': [self.add_video_change_buttons(video_key=model_name, **button) for button in
                             settings['buttons']],
-                'traffic_light': self.x_traffic_light.add_traffic_light(model_name, **settings['traffic_light'])
-                if settings['oriented'] == 'x' else self.y_traffic_light.add_traffic_light(
-                    model_name, **settings['traffic_light']),
-                'oriented': settings['oriented']
+                'traffic_light': self.traffic_light.add_traffic_light(model_name, **settings['traffic_light']),
+                'oriented': settings['traffic_light']['oriented']
             }
             models[model_name] = model
         return models
@@ -68,34 +64,35 @@ class App:
             frame, object_cnt = model['video'].get_frame()
             objects_cnt[model['oriented']] = object_cnt + objects_cnt.get(model['oriented'], 0)
 
-            image = PIL.Image.fromarray(frame)
+            image = Image.fromarray(frame)
             resized_image = image.resize((self.canvas_width, self.canvas_height))
 
-            photo = PIL.ImageTk.PhotoImage(resized_image)
+            photo = ImageTk.PhotoImage(resized_image)
             self.canvases[model_key].create_image(0, 0, image=photo, anchor=tkinter.NW)
             self.photos[model_key] = photo
 
-        print(objects_cnt)
         self.update_traffic_light(objects_cnt)
         self.window.after(self.delay, self.update_video_frame)
 
     def update_traffic_light(self, objects_cnt):
-        if (objects_cnt['x'] > 0 and objects_cnt['y'] == 0
-                and datetime.now() - self.x_traffic_light.last_status_changed_at > timedelta(seconds=10)):
-            self.x_traffic_light.gogreen()
-            self.y_traffic_light.gored()
-        elif (objects_cnt['x'] == 0 and objects_cnt['y'] > 0
-              and datetime.now() - self.x_traffic_light.last_status_changed_at > timedelta(seconds=10)):
-            self.x_traffic_light.gored()
-            self.y_traffic_light.gogreen()
-        elif (objects_cnt['x'] > 0 and objects_cnt['y'] > 0
-              and datetime.now() - self.x_traffic_light.last_status_changed_at > timedelta(seconds=30)):
-            if self.x_traffic_light.traffic_state == 'green':
-                self.x_traffic_light.gored()
-                self.y_traffic_light.gogreen()
-            elif self.x_traffic_light.traffic_state == 'red':
-                self.y_traffic_light.gored()
-                self.x_traffic_light.gogreen()
+        if (objects_cnt[1] > 0 and objects_cnt[0] == 0
+                and datetime.now() - self.traffic_light.last_status_changed_at > timedelta(seconds=20)
+                and self.traffic_light.traffic_state != 1):
+            self.traffic_light.traffic_state = 1
+            self.traffic_light.change_colors()
+        elif (objects_cnt[1] == 0 and objects_cnt[0] > 0
+              and datetime.now() - self.traffic_light.last_status_changed_at > timedelta(seconds=20)
+                and self.traffic_light.traffic_state != 0):
+            self.traffic_light.traffic_state = 0
+            self.traffic_light.change_colors()
+        elif (objects_cnt[1] > 0 and objects_cnt[0] > 0
+              and datetime.now() - self.traffic_light.last_status_changed_at > timedelta(seconds=30)):
+            if self.traffic_light.traffic_state == 0:
+                self.traffic_light.traffic_state = 1
+                self.traffic_light.change_colors()
+            elif self.traffic_light.traffic_state == 1:
+                self.traffic_light.traffic_state = 0
+                self.traffic_light.change_colors()
 
     def add_video_change_buttons(self, button_x, button_y, label, video_key, video_path):
         button = tkinter.Button(self.window, text=label,

@@ -21,15 +21,5 @@ if __name__ == "__main__":
             'straight_6_left_0',
             'straight_8_left_0',
         ]
-    #     'arrived_car'
-    #     'clear_pavement',
-    #     'stop_car',
-    #     'waiting_car',
-    #     'walking_people',
-    #     'arrived_car',
-    #     'clear_road',
-    #     'traffic_road',
-    #     'waiting_people',
-    # ]
     for file_name in file_names:
         main(file_name)
