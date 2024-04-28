@@ -26,5 +26,5 @@ After running the script, you will have a set of images named according to their
 
 1. Visit [Roboflow Polygon Zone](https://roboflow.github.io/polygonzone/?ref=blog.roboflow.com).
 2. Upload the generated images.
-3. Use the polygon drawing tools to mark areas of interest (e.g., lanes, traffic lights, vehicles).
-4. Save and download the annotated data for use in training your object detection models.
+3. Use the polygon drawing tools to mark areas of interest (e.g., lanes, traffic lights).
+4. Save the annotated data for use in training your object detection models.
