@@ -1,39 +1,51 @@
+canvas:
+  width: 200
+  height: 200
 models:
   car_x1:
-    video_source: video/traffic_road.mp4
+    video_source: video/straight_0_left_2.mp4
     places: [170, 325]
     buttons:
-      - {button_x: 5, button_y: 360, label: 'Play waiting car', video_path: 'video/waiting_car.mp4'}
+      - {button_x: 5, button_y: 360, label: 'Play waiting car', video_path: 'video/straight_0_left_2.mp4'}
       - {button_x: 5, button_y: 390, label: 'Play clear road', video_path: 'video/clear_road.mp4'}
-    traffic_light: {x: 380, y: 420, width: 70, height: 190}
+    traffic_light: {x: 380, y: 325, width: 70, height: 190}
     oriented: 'x'
+    tracked_objects: &road
+      - car
+      - bicycle
+      - motorcycle
+      - bus
+      - truck
 
   car_x2:
-    video_source: video/waiting_car.mp4
+    video_source: video/clear_road.mp4
     places: [1350, 325]
     buttons:
-      - {button_x: 1550, button_y: 360, label: 'Play waiting car', video_path: 'video/waiting_car.mp4'}
+      - {button_x: 1550, button_y: 360, label: 'Play waiting car', video_path: 'video/straight_0_left_2.mp4'}
       - {button_x: 1550, button_y: 390, label: 'Play clear road', video_path: 'video/clear_road.mp4'}
     traffic_light: {x: 1250, y: 325, width: 70, height: 190}
     oriented: 'x'
+    tracked_objects: *road
 
   car_y1:
     video_source: video/clear_road.mp4
     places: [650, 10]
     buttons:
-      - {button_x: 850, button_y: 60, label: 'Play waiting car', video_path: 'video/waiting_car.mp4'}
+      - {button_x: 850, button_y: 60, label: 'Play waiting car', video_path: 'video/straight_0_left_2.mp4'}
       - {button_x: 850, button_y: 90, label: 'Play clear road', video_path: 'video/clear_road.mp4'}
-    traffic_light: {x: 570, y: 170, width: 70, height: 190}
+    traffic_light: {x: 570, y: 50, width: 70, height: 190}
     oriented: 'y'
+    tracked_objects: *road
 
   car_y2:
     video_source: video/clear_road.mp4
     places: [650, 700]
     buttons:
-      - {button_x: 850, button_y: 870, label: 'Play waiting car', video_path: 'video/waiting_car.mp4'}
+      - {button_x: 850, button_y: 870, label: 'Play waiting car', video_path: 'video/straight_0_left_2.mp4'}
       - {button_x: 850, button_y: 900, label: 'Play clear road', video_path: 'video/clear_road.mp4'}
     traffic_light: {x: 850, y: 600, width: 70, height: 190}
     oriented: 'y'
+    tracked_objects: *road
 
   people_x1y1:
     video_source: video/clear_pavement.mp4
@@ -41,26 +53,37 @@ models:
     buttons:
       - {button_x: 5, button_y: 60, label: 'Play clear pavement', video_path: 'video/clear_pavement.mp4'}
       - {button_x: 5, button_y: 90, label: 'Play waiting people', video_path: 'video/waiting_people.mp4'}
-    traffic_light: {x: 400, y: 130, width: 70, height: 130, with_yellow_color: false}
-    oriented: 'y'
+    traffic_light: {x: 400, y: 50, width: 70, height: 130, with_yellow_color: false}
+    oriented: 'x'
+    tracked_objects: &pavement
+      - person
 
-#  people_x2y1:
-#    video_source: video/clear_pavement.mp4
-#    places: [1350, 10]
-#    buttons:
-#      - {button_x: 1550, button_y: 60, label: 'Play clear pavement', video_path: 'video/clear_pavement.mp4'}
-#      - {button_x: 1550, button_y: 90, label: 'Play waiting people', video_path: 'video/waiting_people.mp4'}
-#
-#  people_x1y2:
-#    video_source: video/clear_pavement.mp4
-#    places: [170, 700]
-#    buttons:
-#      - {button_x: 5, button_y: 760, label: 'Play clear pavement', video_path: 'video/clear_pavement.mp4'}
-#      - {button_x: 5, button_y: 790, label: 'Play waiting people', video_path: 'video/waiting_people.mp4'}
-#
-#  people_x2y2:
-#    video_source: video/clear_pavement.mp4
-#    places: [1350, 700]
-#    buttons:
-#      - {button_x: 1550, button_y: 760, label: 'Play clear pavement', video_path: 'video/clear_pavement.mp4'}
-#      - {button_x: 1550, button_y: 790, label: 'Play waiting people', video_path: 'video/waiting_people.mp4'}
+  people_x2y1:
+    video_source: video/clear_pavement.mp4
+    places: [1350, 10]
+    buttons:
+      - {button_x: 1550, button_y: 60, label: 'Play clear pavement', video_path: 'video/clear_pavement.mp4'}
+      - {button_x: 1550, button_y: 90, label: 'Play waiting people', video_path: 'video/waiting_people.mp4'}
+    traffic_light: {x: 1250, y: 50, width: 70, height: 130, with_yellow_color: false}
+    oriented: 'x'
+    tracked_objects: *pavement
+
+  people_x1y2:
+    video_source: video/clear_pavement.mp4
+    places: [170, 700]
+    buttons:
+      - {button_x: 5, button_y: 760, label: 'Play clear pavement', video_path: 'video/clear_pavement.mp4'}
+      - {button_x: 5, button_y: 790, label: 'Play waiting people', video_path: 'video/waiting_people.mp4'}
+    traffic_light: {x: 380, y: 700, width: 70, height: 130, with_yellow_color: false}
+    oriented: 'x'
+    tracked_objects: *pavement
+
+  people_x2y2:
+    video_source: video/clear_pavement.mp4
+    places: [1350, 700]
+    buttons:
+      - {button_x: 1550, button_y: 760, label: 'Play clear pavement', video_path: 'video/clear_pavement.mp4'}
+      - {button_x: 1550, button_y: 790, label: 'Play waiting people', video_path: 'video/waiting_people.mp4'}
+    traffic_light: {x: 1250, y: 700, width: 70, height: 130, with_yellow_color: false}
+    oriented: 'x'
+    tracked_objects: *pavement

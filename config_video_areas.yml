@@ -1,11 +1,37 @@
 videos:
-  arrived_car:
+  straight_0_left_1:
     waiting_areas:
-      - [36, 444]
-      - [184, 440]
-      - [452, 632]
-      - [452, 824]
-      - [76, 824]
+      - [64, 193]
+      - [102, 178]
+      - [373, 393]
+      - [142, 419]
+      - [112, 338]
+      - [48, 258]
+    turning_left_area:
+      - [372, 392]
+      - [103, 177]
+      - [140, 164]
+      - [457, 389]
+
+  straight_0_left_2: &fixed_video
+    waiting_straight_area:
+      - [146, 455]
+      - [58, 314]
+      - [63, 229]
+      - [102, 220]
+      - [372, 436]
+    waiting_left_area:
+      - [103, 224]
+      - [160, 216]
+      - [456, 430]
+      - [373, 436]
+
+  clear_road: *fixed_video
+  straight_1_left_0: *fixed_video
+  straight_2_left_0: *fixed_video
+  straight_4_left_0: *fixed_video
+  straight_6_left_0: *fixed_video
+  straight_8_left_0: *fixed_video
 
   clear_pavement:
     waiting_areas:
@@ -14,39 +40,6 @@ videos:
       - [691, 754]
       - [695, 1258]
       - [243, 1262]
-
-  clear_road:
-    waiting_areas:
-      - [ 60, 694 ]
-      - [ 264, 666 ]
-      - [ 768, 1034 ]
-      - [ 760, 1246 ]
-      - [ 116, 1250 ]
-
-  stop_car:
-    waiting_areas:
-      - [32, 370]
-      - [160, 358]
-      - [448, 582]
-      - [456, 826]
-      - [72, 826]
-
-  traffic_road:
-    waiting_areas:
-      - [4, 1432]
-      - [288, 1052]
-      - [720, 1064]
-      - [1072, 1600]
-      - [1064, 1896]
-      - [12, 1892]
-
-  waiting_car:
-    waiting_areas:
-      - [20, 360]
-      - [148, 348]
-      - [456, 576]
-      - [456, 828]
-      - [64, 828]
 
   waiting_people:
     waiting_areas:

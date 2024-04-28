@@ -16,14 +16,14 @@ class App:
         self.window.title(window_title)
         self.window.geometry("1800x1100")
 
-        self.canvas_width = 200
-        self.canvas_height = 290
         self.x_traffic_light = TrafficLight(self.window)
         self.y_traffic_light = TrafficLight(self.window)
 
         with open('config.yml', 'r') as file:
             self.config = yaml.safe_load(file)
         self.models = self.create_models(self.config['models'])
+        self.canvas_width = self.config['canvas']['width']
+        self.canvas_height = self.config['canvas']['height']
 
         self.y_traffic_light.gored()
         self.x_traffic_light.gogreen()
@@ -50,12 +50,12 @@ class App:
         models = {}
         for model_name, settings in models_config.items():
             model = {
-                'video': VideoCapture(settings['video_source']),
+                'video': VideoCapture(settings['video_source'], settings['tracked_objects']),
                 'places': settings['places'],
                 'buttons': [self.add_video_change_buttons(video_key=model_name, **button) for button in
                             settings['buttons']],
                 'traffic_light': self.x_traffic_light.add_traffic_light(model_name, **settings['traffic_light'])
-                if settings['oriented'] == 'y' else self.y_traffic_light.add_traffic_light(
+                if settings['oriented'] == 'x' else self.y_traffic_light.add_traffic_light(
                     model_name, **settings['traffic_light']),
                 'oriented': settings['oriented']
             }
@@ -75,6 +75,7 @@ class App:
             self.canvases[model_key].create_image(0, 0, image=photo, anchor=tkinter.NW)
             self.photos[model_key] = photo
 
+        print(objects_cnt)
         self.update_traffic_light(objects_cnt)
         self.window.after(self.delay, self.update_video_frame)
 
