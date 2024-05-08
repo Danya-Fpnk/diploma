@@ -81,6 +81,7 @@ class VideoCapture:
 
                 current_boxes = []
                 for r in results:
+                    pass
                     for box in r.boxes:
                         objects_cnt += 1
 

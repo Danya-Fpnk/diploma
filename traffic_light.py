@@ -3,7 +3,7 @@ from tkinter import *
 
 
 class TrafficLight():
-
+    traffic_lights = []
     def __init__(self, window):
         self.window = window
         self.last_status_changed_at = datetime.now()
@@ -18,6 +18,7 @@ class TrafficLight():
 
         self.traffic_states = [(True, False), (False, True)]
         self.traffic_state = 1
+        self.traffic_lights.append(self)
 
     def add_traffic_light(self, canvas_name, x, y, width, height, oriented, with_yellow_color=True):
         self.with_yellow_color[canvas_name] = with_yellow_color
@@ -60,13 +61,28 @@ class TrafficLight():
             else:
                 self.red_state.handle_request(canvas_name)
 
-    def change_colors(self, blink_cnt=1):
+    def change_colors(self, blink_cnt=1, application=None):
         self.last_status_changed_at = datetime.now()
         for canvas_name in self.canvases.keys():
             if self.traffic_states[self.traffic_state][self.oriented[canvas_name]]:
                 from_color = 'red'
             else:
                 from_color = 'green'
+
+            if application:
+                if "car" in canvas_name:
+                    new_source = (
+                        application.config["videos"]["clear_road"]
+                        if from_color == "red"
+                        else application.config["videos"]["busy_road"]
+                    )
+                else:
+                    new_source = (
+                        application.config["videos"]["clear_pavement"]
+                        if from_color == "red"
+                        else application.config["videos"]["busy_pavement"]
+                    )
+                application.change_video_source(canvas_name, new_source)
             if blink_cnt <= 6 or (self.with_yellow_color[canvas_name] is False and blink_cnt <= 12):
                 self.canvases[canvas_name].itemconfig(
                     self.ovals[canvas_name][from_color], fill=from_color if blink_cnt % 2 else "white"

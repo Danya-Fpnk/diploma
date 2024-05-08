@@ -1,6 +1,11 @@
 canvas:
   width: 200
   height: 200
+videos:
+  clear_road: video/clear_road.mp4
+  busy_road: video/straight_0_left_2.mp4
+  clear_pavement: video/clear_pavement.mp4
+  busy_pavement: video/waiting_people.mp4
 models:
   car_x1:
     video_source: video/straight_0_left_2.mp4
@@ -49,7 +54,7 @@ models:
     buttons:
       - {button_x: 5, button_y: 60, label: 'Play clear pavement', video_path: 'video/clear_pavement.mp4'}
       - {button_x: 5, button_y: 90, label: 'Play waiting people', video_path: 'video/waiting_people.mp4'}
-    traffic_light: {x: 400, y: 50, width: 70, height: 130, oriented: 0, with_yellow_color: false}
+    traffic_light: {x: 400, y: 50, width: 70, height: 130, oriented: 1, with_yellow_color: false}
     tracked_objects: &pavement
       - person
 
@@ -77,5 +82,5 @@ models:
     buttons:
       - {button_x: 1550, button_y: 760, label: 'Play clear pavement', video_path: 'video/clear_pavement.mp4'}
       - {button_x: 1550, button_y: 790, label: 'Play waiting people', video_path: 'video/waiting_people.mp4'}
-    traffic_light: {x: 1250, y: 700, width: 70, height: 130, oriented: 0, with_yellow_color: false}
+    traffic_light: {x: 1250, y: 700, width: 70, height: 130, oriented: 1, with_yellow_color: false}
     tracked_objects: *pavement

@@ -2,7 +2,7 @@ import tkinter
 import yaml
 from PIL import Image, ImageTk
 from datetime import datetime, timedelta
-
+import time
 from traffic_light import TrafficLight
 from video_utils import VideoCapture
 
@@ -24,9 +24,11 @@ class App:
         self.models = self.create_models(self.config['models'])
         self.canvas_width = self.config['canvas']['width']
         self.canvas_height = self.config['canvas']['height']
-
-        self.traffic_light.change_colors()
+        self.stopwatch_label = tkinter.Label(self.window, text="00:00:00", fg="black", font="Verdana 30 bold")
+        self.stopwatch_label.place(x=700, y=350)
+        self.traffic_light.change_colors(application=self)
         self.photos = {}
+        self.start_time = time.time()
 
         self.canvases = {}
         for model_key, model in self.models.items():
@@ -59,6 +61,10 @@ class App:
         return models
 
     def update_video_frame(self):
+        current_time = time.time() - self.start_time
+        hrs, mins, sec = int(current_time // 3600), int((current_time % 3600) // 60), int(current_time % 60)
+        self.stopwatch_label.config(text="{:02d}:{:02d}:{:02d}".format(hrs, mins, sec))
+
         objects_cnt = {}
         for model_key, model in self.models.items():
             frame, object_cnt = model['video'].get_frame()
@@ -76,23 +82,25 @@ class App:
 
     def update_traffic_light(self, objects_cnt):
         if (objects_cnt[1] > 0 and objects_cnt[0] == 0
-                and datetime.now() - self.traffic_light.last_status_changed_at > timedelta(seconds=20)
+                and datetime.now() - self.traffic_light.last_status_changed_at > timedelta(seconds=10)
                 and self.traffic_light.traffic_state != 1):
             self.traffic_light.traffic_state = 1
-            self.traffic_light.change_colors()
+            self.traffic_light.change_colors(application=self)
         elif (objects_cnt[1] == 0 and objects_cnt[0] > 0
-              and datetime.now() - self.traffic_light.last_status_changed_at > timedelta(seconds=20)
+              and datetime.now() - self.traffic_light.last_status_changed_at > timedelta(seconds=10)
                 and self.traffic_light.traffic_state != 0):
             self.traffic_light.traffic_state = 0
-            self.traffic_light.change_colors()
+            self.traffic_light.change_colors(application=self)
         elif (objects_cnt[1] > 0 and objects_cnt[0] > 0
-              and datetime.now() - self.traffic_light.last_status_changed_at > timedelta(seconds=30)):
+              and datetime.now() - self.traffic_light.last_status_changed_at > timedelta(seconds=20)):
             if self.traffic_light.traffic_state == 0:
                 self.traffic_light.traffic_state = 1
-                self.traffic_light.change_colors()
+                self.traffic_light.change_colors(application=self)
             elif self.traffic_light.traffic_state == 1:
                 self.traffic_light.traffic_state = 0
-                self.traffic_light.change_colors()
+                self.traffic_light.change_colors(application=self)
+        elif datetime.now() - self.traffic_light.last_status_changed_at > timedelta(seconds=30):
+            self.traffic_light.change_colors(application=self)
 
     def add_video_change_buttons(self, button_x, button_y, label, video_key, video_path):
         button = tkinter.Button(self.window, text=label,
@@ -108,4 +116,4 @@ class App:
 
 if __name__ == "__main__":
     # Create a window and pass it to the Application object
-    App(tkinter.Tk(), "Tkinter and OpenCV")
+    application = App(tkinter.Tk(), "Tkinter and OpenCV")
