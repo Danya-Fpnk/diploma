@@ -1,6 +1,12 @@
+import time
+from datetime import datetime
+import random
+
 import cv2
 import numpy as np
-from display import model, class_names
+from ultralytics import YOLO
+
+from model import model, class_names
 import cvzone
 import math
 import yaml
@@ -22,114 +28,158 @@ video_areas = load_video_areas('config_video_areas.yml')
 
 
 class VideoCapture:
-    def __init__(self, video_source, tracked_objects, speed=9):
+    def __init__(self, video_source, video_sources, tracked_objects, speed=5):
         self.video_source = video_source
         self.vid = cv2.VideoCapture(video_source)
+        self.video_sources = video_sources
+        print(f'Video source: {video_sources}')
         if not self.vid.isOpened():
             raise ValueError("Unable to open video source", video_source)
 
         self.video_areas = {key: np.array(value, np.int32) for key, value in video_areas[video_source].items()}
 
         self.last_frame = None
+        self.is_last_frame = False
+        self.dilation_size = 40
+        self.mask = None
         self.speed = speed
         self.frame_count = 0
-        self.prev_boxes = []
-        self.tracked_objects = [class_names.index(tracked_object) for tracked_object in tracked_objects]
+        self.tracked_classes = [class_names.index(tracked_object) for tracked_object in tracked_objects]
 
-    def calculate_distance(self, box1, box2):
-        center1 = ((box1[0] + box1[2]) / 2, (box1[1] + box1[3]) / 2)
-        center2 = ((box2[0] + box2[2]) / 2, (box2[1] + box2[3]) / 2)
-        return (center1[0] - center2[0]) + (center1[1] - center2[1])
-
-    def dilate_polygon(self, polygon, dilation_size):
-        # Создаем структурирующий элемент для дилатации
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (dilation_size, dilation_size))
-        # Применяем дилатацию к маске полигона
-        dilated_polygon = cv2.dilate(polygon, kernel, iterations=1)
-        return dilated_polygon
+        self.objects_in_areas_stats = {
+            'lst_in_waiting_area': {area_key: {tracked_class: {} for tracked_class in self.tracked_classes} for area_key
+                                    in self.video_areas.keys()},
+            'detect_time': {area_key: {tracked_class: {} for tracked_class in self.tracked_classes} for area_key in
+                            self.video_areas.keys()}
+        }
+        self.model = YOLO("yolov8n.pt")
 
     def get_frame(self):
-        dilation_size = 40  # Размер расширения полигонов
         while True:
-            objects_cnt = 0
-            inside_counts = 0
             if self.vid.isOpened():
                 ret, frame = self.vid.read()
+                self.is_last_frame = True
                 self.frame_count += 1
                 if not self.frame_count % self.speed == 0:
                     continue
 
                 if ret is True:
                     self.last_frame = frame.copy()
-                else:
-                    frame = self.last_frame.copy()
+                    self.is_last_frame = False
 
-                # Создаем маску для всех полигонов с дилатацией
-                mask = np.zeros_like(frame)
-                for area_key in self.video_areas.keys():
-                    polygon = np.array(self.video_areas[area_key], dtype=np.int32)
-                    dilated_mask = np.zeros_like(frame)
-                    cv2.fillPoly(dilated_mask, [polygon], (255,) * frame.shape[2])
-                    dilated_polygon = self.dilate_polygon(dilated_mask, dilation_size)
-                    mask = cv2.bitwise_or(mask, dilated_polygon)
+            return self.last_frame
 
-                # Применяем маску для вырезания всех полигонов сразу
-                masked_frame = cv2.bitwise_and(frame, mask)
+    def dilate_polygon(self, polygon, dilation_size):
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (dilation_size, dilation_size))
+        dilated_polygon = cv2.dilate(polygon, kernel, iterations=1)
+        return dilated_polygon
 
-                # Анализируем masked_frame с помощью YOLO
-                results = model(masked_frame, stream=True, classes=self.tracked_objects)
+    def get_masked_frame(self, frame):
+        if self.mask is None:
+            self.mask = np.zeros_like(frame)
+            for area_key in self.video_areas.keys():
+                polygon = np.array(self.video_areas[area_key], dtype=np.int32)
+                dilated_mask = np.zeros_like(frame)
+                cv2.fillPoly(dilated_mask, [polygon], (255,) * frame.shape[2])
+                dilated_polygon = self.dilate_polygon(dilated_mask, self.dilation_size)
+                self.mask = cv2.bitwise_or(self.mask, dilated_polygon)
+        masked_frame = cv2.bitwise_and(frame, self.mask)
+        return masked_frame
 
-                current_boxes = []
-                for r in results:
-                    pass
-                    for box in r.boxes:
-                        objects_cnt += 1
+    def draw_waiting_areas(self, frame):
+        for area_key in self.video_areas.keys():
+            polygon = np.array(self.video_areas[area_key], dtype=np.int32)
+            if area_key == 'west_east_straight':
+                cv2.polylines(frame, [polygon], True, (0, 0, 255), 6)
+            elif area_key == 'north_south_straight':
+                cv2.polylines(frame, [polygon], True, (0, 255, 0), 6)
+            else:
+                cv2.polylines(frame, [polygon], True, (0, 255, 255), 6)
 
-                        x1, y1, x2, y2 = box.xyxy[0]
-                        x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
-                        cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 255), 3)
+        return frame
 
-                        conf = math.ceil((box.conf[0] * 100)) / 100
-                        cls = int(box.cls[0])
+    def draw_using_yolo_model(self, masked_frame, frame):
+        results = self.model.track(masked_frame, classes=self.tracked_classes, imgsz=640, show=False, persist=True)
 
-                        is_waiting = False
-                        if self.prev_boxes:
-                            distances = [self.calculate_distance((x1, y1, x2, y2), prev) for prev in self.prev_boxes]
-                            if min(distances) < 2:
-                                is_waiting = True
+        detect_unixtime = int(time.time())
+        if results[0].boxes.id is not None:
+            boxes = results[0].boxes.xyxy.cpu()
+            clss = results[0].boxes.cls.cpu().tolist()
+            track_ids = results[0].boxes.id.int().cpu().tolist()
 
-                        cvzone.putTextRect(frame, f'is_waiting: {is_waiting}', (max(0, x1), max(35, y1)), scale=1,
-                                           thickness=1)
+            for box, track_id, cls in zip(boxes, track_ids, clss):
 
-                        current_boxes.append((x1, y1, x2, y2))
-
-                        # Теперь проверяем, находится ли центр в одной из маскированных областей
-                        for area_key in self.video_areas.keys():
-                            polygon = np.array(self.video_areas[area_key], dtype=np.int32)
-                            cx, cy = (x1 + x2) // 2, (y1 + y2) // 2
-                            if cv2.pointPolygonTest(polygon, (cx, cy), False) >= 0:
-                                inside_counts += 1
-
-                print(inside_counts)
-                self.prev_boxes = current_boxes.copy()
+                x1, y1, x2, y2 = box[0], box[1], box[2], box[3]
+                x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
+                cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 255), 3)
 
                 for area_key in self.video_areas.keys():
                     polygon = np.array(self.video_areas[area_key], dtype=np.int32)
-                    if area_key == 'waiting_straight_area':
-                        cv2.polylines(frame, [polygon], True, (0, 0, 255), 6)
-                    elif area_key == 'waiting_left_area':
-                        cv2.polylines(frame, [polygon], True, (0, 255, 0), 6)
+                    cx = (x1 + x2) // 2
+                    if track_id in self.objects_in_areas_stats['lst_in_waiting_area'][area_key][cls]:
+                        self.objects_in_areas_stats['lst_in_waiting_area'][area_key][cls][
+                            track_id] = detect_unixtime
                     else:
-                        cv2.polylines(frame, [polygon], True, (0, 255, 255), 6)
+                        # Initialize tracking of new track_id
+                        self.objects_in_areas_stats['lst_in_waiting_area'][area_key][cls][
+                            track_id] = detect_unixtime
+                        self.objects_in_areas_stats['detect_time'][area_key][cls][track_id] = detect_unixtime
 
-                return cv2.cvtColor(frame, cv2.COLOR_BGR2RGB), objects_cnt
+        print(self.objects_in_areas_stats)
 
-    def set_vid(self, video_source=0):
+        for area_key in self.video_areas.keys():
+            for cls in self.tracked_classes:
+                track_ids = list(self.objects_in_areas_stats['lst_in_waiting_area'][area_key][cls].keys())
+                for track_id in track_ids:
+                    if detect_unixtime - self.objects_in_areas_stats['lst_in_waiting_area'][area_key][cls][track_id] > 6:
+                        del self.objects_in_areas_stats['lst_in_waiting_area'][area_key][cls][track_id]
+                        del self.objects_in_areas_stats['detect_time'][area_key][cls][track_id]
+
+                        # cls_value['lst_in_waiting_area'].pop(track_id, None)
+                        # cls_value['detect_time'].pop(track_id, None)
+        return frame
+
+
+    def draw_objects(self):
+        frame = self.last_frame
+
+        masked_frame = self.get_masked_frame(frame)
+
+        frame = self.draw_using_yolo_model(masked_frame, frame)
+
+        frame = self.draw_waiting_areas(frame)
+
+        return cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+    def get_random_video_source(self, video_type):
+        if video_type not in self.video_sources:
+            raise ValueError(f"Video type '{video_type}' not found in video sources")
+
+        sources = self.video_sources[video_type]
+        if isinstance(sources, list):
+            selected_source = random.choice(sources)
+        else:
+            selected_source = sources
+
+        print(f'random({sources}) -> {selected_source}')
+        return selected_source
+
+    def set_vid(self, video_source=None, video_type=None):
+        if video_source is None:
+            video_source = self.get_random_video_source(video_type)
         self.__del__()
         self.vid = cv2.VideoCapture(video_source)
         self.video_source = video_source
 
         self.video_areas = {key: np.array(value, np.int32) for key, value in video_areas[video_source].items()}
+
+        self.objects_in_areas_stats = {
+            'lst_in_waiting_area': {area_key: {tracked_class: {} for tracked_class in self.tracked_classes} for area_key
+                                    in self.video_areas.keys()},
+            'detect_time': {area_key: {tracked_class: {} for tracked_class in self.tracked_classes} for area_key in
+                            self.video_areas.keys()}
+        }
+        self.model = YOLO("yolov8n.pt")
         if not self.vid.isOpened():
             raise ValueError("Unable to open video source", video_source)
 

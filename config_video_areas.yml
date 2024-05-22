@@ -1,6 +1,6 @@
 videos:
   straight_0_left_1:
-    waiting_areas:
+    north_south_straight:
       - [64, 193]
       - [102, 178]
       - [373, 393]
@@ -13,28 +13,41 @@ videos:
       - [140, 164]
       - [457, 389]
 
-  straight_0_left_2: &fixed_video
-    waiting_straight_area:
-      - [146, 455]
-      - [58, 314]
-      - [63, 229]
-      - [102, 220]
-      - [372, 436]
-    waiting_left_area:
-      - [103, 224]
-      - [160, 216]
-      - [456, 430]
-      - [373, 436]
+  straight_0_left_2: &straight_left
+      north_south_straight:
+        - [146, 455]
+        - [58, 314]
+        - [63, 229]
+        - [102, 220]
+        - [372, 436]
+      turning_left_area:
+        - [103, 224]
+        - [160, 216]
+        - [456, 430]
+        - [373, 436]
 
-  clear_road: *fixed_video
-  straight_1_left_0: *fixed_video
-  straight_2_left_0: *fixed_video
-  straight_4_left_0: *fixed_video
-  straight_6_left_0: *fixed_video
-  straight_8_left_0: *fixed_video
+  straight_0_left_0: *straight_left
+  straight_1_left_0: *straight_left
+  straight_2_left_0: *straight_left
+  straight_4_left_0: *straight_left
+  straight_6_left_0: *straight_left
+  straight_8_left_0: *straight_left
+
+  straight_1: &straight
+    west_east_straight:
+      - [ 62, 223 ]
+      - [ 142, 207 ]
+      - [ 462, 429 ]
+      - [ 144, 453 ]
+      - [ 63, 311 ]
+
+  straight_0: *straight
+  straight_4: *straight
+  straight_6: *straight
+  straight_8: *straight
 
   clear_pavement:
-    waiting_areas:
+    west_east_straight:
       - [23, 1130]
       - [331, 678]
       - [691, 754]
@@ -42,7 +55,7 @@ videos:
       - [243, 1262]
 
   waiting_people:
-    waiting_areas:
+    west_east_straight:
       - [8, 684]
       - [172, 424]
       - [456, 488]
@@ -50,7 +63,7 @@ videos:
       - [236, 832]
 
   walking_people:
-    waiting_areas:
+    west_east_straight:
       - [8, 684]
       - [172, 424]
       - [456, 488]
