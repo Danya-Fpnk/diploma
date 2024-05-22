@@ -6,9 +6,7 @@ import cv2
 import numpy as np
 from ultralytics import YOLO
 
-from model import model, class_names
-import cvzone
-import math
+from model import class_names
 import yaml
 
 
@@ -179,7 +177,8 @@ class VideoCapture:
             'detect_time': {area_key: {tracked_class: {} for tracked_class in self.tracked_classes} for area_key in
                             self.video_areas.keys()}
         }
-        self.model = YOLO("yolov8n.pt")
+        if 'pavement' in video_source or 'people' in video_source:
+            self.model = YOLO("yolov8n.pt")
         if not self.vid.isOpened():
             raise ValueError("Unable to open video source", video_source)
 

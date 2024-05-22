@@ -97,7 +97,7 @@ class TrafficLight():
             for canvas_name in self.canvases.keys():
                 video_type = ("clear" if self.canvases[canvas_name]['oriented'] == oriented_to_green else "busy")
                 application.change_video_source(canvas_name, video_type=video_type)
-            self.window.after(500, self.handle_requests, oriented_to_green)
+            self.window.after(1, self.handle_requests, oriented_to_green)
             return None
 
     def change_colors(self, oriented_to_green, application, blink_cnt=1,):

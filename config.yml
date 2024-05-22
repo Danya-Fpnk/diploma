@@ -24,9 +24,7 @@ models:
         - video/straight_6.mp4
         - video/straight_8.mp4
     places: [170, 325]
-    buttons:
-      - {button_x: 5, button_y: 360, label: 'Play waiting car', video_path: 'video/straight_4_left_0.mp4'}
-      - {button_x: 5, button_y: 390, label: 'Play clear road', video_path: 'video/clear.mp4'}
+    buttons: {button_x: 5, button_y: 360}
     traffic_light: {x: 380, y: 325, width: 70, height: 190, oriented: 'west_east_straight'}
     tracked_objects: &road
       - car
@@ -45,9 +43,7 @@ models:
         - video/straight_6.mp4
         - video/straight_8.mp4
     places: [1350, 325]
-    buttons:
-      - {button_x: 1550, button_y: 360, label: 'Play waiting car', video_path: 'video/straight_4_left_0.mp4'}
-      - {button_x: 1550, button_y: 390, label: 'Play clear road', video_path: 'video/clear.mp4'}
+    buttons: {button_x: 1550, button_y: 360}
     traffic_light: {x: 1250, y: 325, width: 70, height: 190, oriented: 'west_east_straight'}
     tracked_objects: *road
 
@@ -64,9 +60,7 @@ models:
         - video/straight_0_left_1.mp4
         - video/straight_0_left_2.mp4
     places: [650, 10]
-    buttons:
-      - {button_x: 850, button_y: 60, label: 'Play waiting car', video_path: 'video/straight_0_left_2.mp4'}
-      - {button_x: 850, button_y: 90, label: 'Play clear road', video_path: 'video/clear.mp4'}
+    buttons: {button_x: 850, button_y: 60}
     traffic_light: {x: 570, y: 50, width: 70, height: 190, oriented: 'north_south_straight'}
     tracked_objects: *road
 
@@ -83,9 +77,7 @@ models:
         - video/straight_0_left_1.mp4
         - video/straight_0_left_2.mp4
     places: [650, 700]
-    buttons:
-      - {button_x: 850, button_y: 870, label: 'Play waiting car', video_path: 'video/straight_4_left_0.mp4'}
-      - {button_x: 850, button_y: 900, label: 'Play clear road', video_path: 'video/clear.mp4'}
+    buttons: {button_x: 850, button_y: 870}
     traffic_light: {x: 850, y: 600, width: 70, height: 190, oriented: 'north_south_straight'}
     tracked_objects: *road
 
@@ -95,9 +87,7 @@ models:
       clear: video/clear_pavement.mp4
       busy: video/waiting_people.mp4
     places: [170, 10]
-    buttons:
-      - {button_x: 5, button_y: 60, label: 'Play clear pavement', video_path: 'video/clear_pavement.mp4'}
-      - {button_x: 5, button_y: 90, label: 'Play waiting people', video_path: 'video/waiting_people.mp4'}
+    buttons: {button_x: 5, button_y: 60}
     traffic_light: {x: 400, y: 50, width: 70, height: 130, oriented: 'west_east_straight', with_yellow_color: false}
     tracked_objects: &pavement
       - person
@@ -108,9 +98,7 @@ models:
       clear: video/clear_pavement.mp4
       busy: video/waiting_people.mp4
     places: [1350, 10]
-    buttons:
-      - {button_x: 1550, button_y: 60, label: 'Play clear pavement', video_path: 'video/clear_pavement.mp4'}
-      - {button_x: 1550, button_y: 90, label: 'Play waiting people', video_path: 'video/waiting_people.mp4'}
+    buttons: {button_x: 1550, button_y: 60}
     traffic_light: {x: 1250, y: 50, width: 70, height: 130, oriented: 'west_east_straight', with_yellow_color: false}
     tracked_objects: *pavement
 
@@ -120,9 +108,7 @@ models:
       clear: video/clear_pavement.mp4
       busy: video/waiting_people.mp4
     places: [170, 700]
-    buttons:
-      - {button_x: 5, button_y: 760, label: 'Play clear pavement', video_path: 'video/clear_pavement.mp4'}
-      - {button_x: 5, button_y: 790, label: 'Play waiting people', video_path: 'video/waiting_people.mp4'}
+    buttons: {button_x: 5, button_y: 760}
     traffic_light: {x: 380, y: 700, width: 70, height: 130, oriented: 'west_east_straight', with_yellow_color: false}
     tracked_objects: *pavement
 
@@ -132,8 +118,6 @@ models:
       clear: video/clear_pavement.mp4
       busy: video/waiting_people.mp4
     places: [1350, 700]
-    buttons:
-      - {button_x: 1550, button_y: 760, label: 'Play clear pavement', video_path: 'video/clear_pavement.mp4'}
-      - {button_x: 1550, button_y: 790, label: 'Play waiting people', video_path: 'video/waiting_people.mp4'}
+    buttons: {button_x: 1550, button_y: 760}
     traffic_light: {x: 1250, y: 700, width: 70, height: 130, oriented: 'west_east_straight', with_yellow_color: false}
     tracked_objects: *pavement

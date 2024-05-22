@@ -5,15 +5,6 @@ from ultralytics import YOLO
 # import cvzone
 # import math
 #
-model = YOLO("yolov8n.pt")
-
-
-# counter = object_counter.ObjectCounter()
-# counter.set_args(view_img=True,
-#                  reg_pts=region_points,
-#                  classes_names=model.names,
-#                  draw_tracks=True,
-#                  line_thickness=2)
 
 class_names = [
     "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck",

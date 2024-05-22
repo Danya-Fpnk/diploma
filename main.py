@@ -1,3 +1,4 @@
+import re
 import tkinter
 import yaml
 from PIL import Image, ImageTk
@@ -67,8 +68,11 @@ class App:
             model = {
                 'video': VideoCapture(settings['video_source'], settings['video_sources'], settings['tracked_objects']),
                 'places': settings['places'],
-                'buttons': [self.add_video_change_buttons(video_key=model_name, **button) for button in
-                            settings['buttons']],
+                'buttons': self.add_video_change_buttons(
+                    model_name,
+                    settings['buttons'],
+                    settings['video_sources']
+                ),
                 'traffic_light': self.traffic_light.add_traffic_light(model_name, **settings['traffic_light']),
             }
             models[model_name] = model
@@ -83,8 +87,6 @@ class App:
                     self.objects_in_areas_stats['detect_time'][area_key][obj_class] = {}
                 for track_id, detect_time in new_stats['detect_time'][area_key][obj_class].items():
                     self.objects_in_areas_stats['detect_time'][area_key][obj_class][f'{model_name}_{track_id}'] = detect_time
-
-    # 'detect_time': {'waiting_straight_area': {2: {1: 1715625080, 2: 1715625081}, 1: {}, 3: {}, 5: {}, 7: {}}, 'waiting_left_area': {2: {1: 1715625080, 2: 1715625081}, 1: {}, 3: {}, 5: {}, 7: {}}}}
 
     def update_video_frame(self):
         current_time = time.time() - self.start_time
@@ -113,7 +115,7 @@ class App:
     @staticmethod
     def calculate_min_time(objects_cnt, direction):
         base_time = 10
-        extra_time_per_object = 2
+        extra_time_per_object = 1
 
         total_objects = sum(
             1
@@ -127,7 +129,7 @@ class App:
         for obj_class, track_ids in objects.items():
             for track_id, detect_time in track_ids.items():
                 wait_time = current_unixtime - detect_time
-                wait_time_bonus = (wait_time // 5)  # 1 единица приоритета за каждые 5 секунд ожидания
+                wait_time_bonus = (wait_time // 5)
                 total_priority += (self.priority.get(obj_class, 0) + wait_time_bonus)
         return total_priority
 
@@ -137,9 +139,11 @@ class App:
             direction: self.calculate_priority(current_unixtime, objects)
             for direction, objects in objects_in_areas_stats['detect_time'].items()
         }
-        print(direction_priorities)
-        max_priority_direction = max(direction_priorities, key=direction_priorities.get)
         current_time = datetime.now()
+        max_priority_direction = max(direction_priorities, key=direction_priorities.get)
+
+
+        print(direction_priorities)
         print(max_priority_direction)
         print(current_time - self.traffic_light.last_status_changed_at > timedelta(seconds=self.min_change_time))
         print(current_time - self.traffic_light.last_status_changed_at)
@@ -154,13 +158,32 @@ class App:
             print('here')
             self.traffic_light.change_colors(max_priority_direction, application=self)
 
-    # {'lst_in_waiting_area': {'waiting_straight_area': {2: {1: 1715625088, 2: 1715625088}, 1: {}, 3: {}, 5: {}, 7: {}}, 'waiting_left_area': {2: {1: 1715625088, 2: 1715625088}, 1: {}, 3: {}, 5: {}, 7: {}}},
-    # 'detect_time': {'waiting_straight_area': {2: {1: 1715625080, 2: 1715625081}, 1: {}, 3: {}, 5: {}, 7: {}}, 'waiting_left_area': {2: {1: 1715625080, 2: 1715625081}, 1: {}, 3: {}, 5: {}, 7: {}}}}
+    def add_video_change_buttons(self, model_name, buttons_settings, video_sources):
+        button_x = buttons_settings['button_x']
+        button_y = buttons_settings['button_y']
 
-    def add_video_change_buttons(self, button_x, button_y, label, video_key, video_path):
-        button = tkinter.Button(self.window, text=label,
-                                command=lambda: self.change_video_source(video_key, video_path))
-        button.place(x=button_x, y=button_y)
+        for key, value in video_sources.items():
+            if isinstance(value, list):
+                for video_source in value:
+                    self.create_button(model_name, video_source, button_x, button_y)
+                    button_y += 30
+            else:
+                self.create_button(model_name, value, button_x, button_y)
+                button_y += 30
+
+    def create_button(self, model_name, video_source, button_x, button_y):
+        match = re.search(r'video/(.+?)\.mp4', video_source)
+        if match:
+            video_name = match.group(1)
+            button = tkinter.Button(
+                self.window,
+                text=f'Play {video_name}',
+                command=lambda vs=video_source: self.change_video_source(model_name, vs)
+            )
+            button.place(x=button_x, y=button_y)
+        else:
+            print(f"Invalid video source format: {video_source}")
+
 
     def change_video_source(self, video_key, new_source=None, video_type=None):
         if video_key in self.models:
