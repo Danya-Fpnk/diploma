@@ -98,14 +98,15 @@ class VideoCapture:
                 for area_key in self.video_areas.keys():
                     polygon = np.array(self.video_areas[area_key], dtype=np.int32)
                     cx = (x1 + x2) // 2
-                    if track_id in self.objects_in_areas_stats['lst_in_waiting_area'][area_key][cls]:
-                        self.objects_in_areas_stats['lst_in_waiting_area'][area_key][cls][
-                            track_id] = detect_unixtime
-                    else:
-                        # Initialize tracking of new track_id
-                        self.objects_in_areas_stats['lst_in_waiting_area'][area_key][cls][
-                            track_id] = detect_unixtime
-                        self.objects_in_areas_stats['detect_time'][area_key][cls][track_id] = detect_unixtime
+                    if cv2.pointPolygonTest(polygon, (cx, y2), False) >= 0:
+                        if track_id in self.objects_in_areas_stats['lst_in_waiting_area'][area_key][cls]:
+                            self.objects_in_areas_stats['lst_in_waiting_area'][area_key][cls][
+                                track_id] = detect_unixtime
+                        else:
+                            # Initialize tracking of new track_id
+                            self.objects_in_areas_stats['lst_in_waiting_area'][area_key][cls][
+                                track_id] = detect_unixtime
+                            self.objects_in_areas_stats['detect_time'][area_key][cls][track_id] = detect_unixtime
 
         for area_key in self.video_areas.keys():
             for cls in self.tracked_classes:

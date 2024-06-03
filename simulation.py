@@ -27,9 +27,9 @@ class Simulation:
         self.canvas_height = self.config['canvas']['height']
         self.stopwatch_label = tkinter.Label(self.window, text="00:00:00", fg="black", font="Verdana 30 bold")
         self.stopwatch_label.place(x=700, y=350)
-        self.direction_priorities_label = tkinter.Label(self.window, text='', font=('Arial', 12))
-        self.direction_priorities_label.place(x=650, y=400)
-        self.time_to_access_changing_traffic_signal = tkinter.Label(self.window, text='', font=('Arial', 12))
+        self.direction_priorities_label = tkinter.Label(self.window, text='', font=('Arial', 24))
+        self.direction_priorities_label.place(x=500, y=400)
+        self.time_to_access_changing_traffic_signal = tkinter.Label(self.window, text='', font="Verdana 30 bold")
         self.time_to_access_changing_traffic_signal.place(x=700, y=450)
 
         self.canvases = {}
@@ -95,7 +95,13 @@ class Simulation:
         print('priorities_text', priorities_text)
         print('priorities_text', time_to_access_changing_traffic_signal)
         self.direction_priorities_label.config(text=priorities_text)
-        self.time_to_access_changing_traffic_signal.config(text=time_to_access_changing_traffic_signal)
+
+        total_seconds = int(time_to_access_changing_traffic_signal.total_seconds())
+        hours, remainder = divmod(total_seconds, 3600)
+        minutes, seconds = divmod(remainder, 60)
+        time_str = f"{hours:02}:{minutes:02}:{seconds:02}"
+
+        self.time_to_access_changing_traffic_signal.config(text=time_str)
 
         self.window.after(self.delay, self.update_video_frame)
 
