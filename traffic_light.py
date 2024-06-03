@@ -19,14 +19,15 @@ class TrafficLight():
 
         self.traffic_lights.append(self)
 
-    def add_traffic_light(self, canvas_name, x, y, width, height, oriented, with_yellow_color=True):
+    def add_traffic_light(self, model_name, canvas_name, x, y, width, height, oriented, with_yellow_color=True):
         self.oriented[canvas_name] = oriented
 
         self.canvases[canvas_name] = {
             'canvas': Canvas(self.window, width=width, height=height, bg="#003366"),
             'oriented': oriented,
             'with_yellow_color': with_yellow_color,
-            'state': 'yellow'
+            'state': 'yellow',
+            'model_name': model_name
         }
         self.canvases[canvas_name]['canvas'].place(x=x, y=y)
 
@@ -95,11 +96,10 @@ class TrafficLight():
         if blink_cnt <= 12:
             self.window.after(500, self._change_colors, oriented_to_green, application, blink_cnt + 1)
         else:
+            self.window.after(1, self.handle_requests, oriented_to_green)
             for canvas_name in self.canvases.keys():
                 video_type = ("clear" if self.canvases[canvas_name]['oriented'] == oriented_to_green else "busy")
-                application.change_video_source(canvas_name, video_type=video_type)
-            self.window.after(1, self.handle_requests, oriented_to_green)
-            return None
+                application.change_video_source(self.canvases[canvas_name]['model_name'], video_type=video_type)
 
     def change_colors(self, oriented_to_green, application, blink_cnt=1,):
         self.last_status_changed_at = datetime.now()

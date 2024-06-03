@@ -20,7 +20,8 @@ models:
         - video/straight_8.mp4
     places: [170, 325]
     buttons: {button_x: 5, button_y: 360}
-    traffic_light: {x: 380, y: 325, width: 70, height: 190, oriented: 'west_east_straight'}
+    traffic_lights:
+      - {x: 380, y: 325, width: 70, height: 190, oriented: 'west_east_straight'}
     tracked_objects: &road
       - car
       - bicycle
@@ -39,7 +40,8 @@ models:
         - video/straight_8.mp4
     places: [1350, 325]
     buttons: {button_x: 1550, button_y: 360}
-    traffic_light: {x: 1250, y: 325, width: 70, height: 190, oriented: 'west_east_straight'}
+    traffic_lights:
+      - {x: 1250, y: 325, width: 70, height: 190, oriented: 'west_east_straight'}
     tracked_objects: *road
 
   car_north:
@@ -55,8 +57,10 @@ models:
         - video/straight_0_left_1.mp4
         - video/straight_0_left_2.mp4
     places: [650, 10]
-    buttons: {button_x: 850, button_y: 60}
-    traffic_light: {x: 570, y: 50, width: 70, height: 190, oriented: 'north_south_straight'}
+    buttons: {button_x: 850, button_y: 10}
+    traffic_lights:
+      - {x: 570, y: 50, width: 70, height: 190, oriented: 'north_south_straight'}
+      - {x: 470, y: 50, width: 70, height: 190, oriented: 'turning_left_area'}
     tracked_objects: *road
 
   car_south:
@@ -72,8 +76,10 @@ models:
         - video/straight_0_left_1.mp4
         - video/straight_0_left_2.mp4
     places: [650, 700]
-    buttons: {button_x: 850, button_y: 870}
-    traffic_light: {x: 850, y: 600, width: 70, height: 190, oriented: 'north_south_straight'}
+    buttons: {button_x: 850, button_y: 800}
+    traffic_lights:
+      - {x: 850, y: 600, width: 70, height: 190, oriented: 'north_south_straight'}
+      - {x: 950, y: 600, width: 70, height: 190, oriented: 'turning_left_area' }
     tracked_objects: *road
 
   people_x1y1:
@@ -83,7 +89,8 @@ models:
       busy: video/waiting_people.mp4
     places: [170, 10]
     buttons: {button_x: 5, button_y: 60}
-    traffic_light: {x: 400, y: 50, width: 70, height: 130, oriented: 'west_east_straight', with_yellow_color: false}
+    traffic_lights:
+      - {x: 380, y: 50, width: 70, height: 130, oriented: 'west_east_straight', with_yellow_color: false}
     tracked_objects: &pavement
       - person
 
@@ -94,7 +101,8 @@ models:
       busy: video/waiting_people.mp4
     places: [1350, 10]
     buttons: {button_x: 1550, button_y: 60}
-    traffic_light: {x: 1250, y: 50, width: 70, height: 130, oriented: 'west_east_straight', with_yellow_color: false}
+    traffic_lights:
+      - {x: 1250, y: 50, width: 70, height: 130, oriented: 'west_east_straight', with_yellow_color: false}
     tracked_objects: *pavement
 
   people_x1y2:
@@ -104,7 +112,8 @@ models:
       busy: video/waiting_people.mp4
     places: [170, 700]
     buttons: {button_x: 5, button_y: 760}
-    traffic_light: {x: 380, y: 700, width: 70, height: 130, oriented: 'west_east_straight', with_yellow_color: false}
+    traffic_lights:
+      - {x: 380, y: 700, width: 70, height: 130, oriented: 'west_east_straight', with_yellow_color: false}
     tracked_objects: *pavement
 
   people_x2y2:
@@ -114,5 +123,6 @@ models:
       busy: video/waiting_people.mp4
     places: [1350, 700]
     buttons: {button_x: 1550, button_y: 760}
-    traffic_light: {x: 1250, y: 700, width: 70, height: 130, oriented: 'west_east_straight', with_yellow_color: false}
+    traffic_lights:
+      - {x: 1250, y: 700, width: 70, height: 130, oriented: 'west_east_straight', with_yellow_color: false}
     tracked_objects: *pavement

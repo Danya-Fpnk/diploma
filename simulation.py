@@ -58,8 +58,13 @@ class Simulation:
                     settings['buttons'],
                     settings['video_sources']
                 ),
-                'traffic_light': self.traffic_light.add_traffic_light(model_name, **settings['traffic_light']),
             }
+            for traffic_light in settings['traffic_lights']:
+                self.traffic_light.add_traffic_light(
+                    model_name,
+                    f'{model_name}_{traffic_light["oriented"]}',
+                    **traffic_light
+                )
             models[model_name] = model
         return models
 
