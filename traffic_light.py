@@ -64,6 +64,7 @@ class TrafficLight():
         self.resize_ovals(canvas_name)
 
     def handle_requests(self, oriented_to_green):
+        print(f'Turning traffic light to green for {oriented_to_green} orientation...')
         for canvas_name in self.canvases.keys():
             if self.canvases[canvas_name]['oriented'] == oriented_to_green:
                 self.green_state.handle_request(canvas_name)
@@ -121,7 +122,6 @@ class RedState(State):
         self.traffic_light = traffic_light
 
     def handle_request(self, canvas_name):
-        print('Wait for turning traffic light to green...')
         self.traffic_light.canvases[canvas_name]['state'] = 'red'
         self.traffic_light.canvases[canvas_name]['canvas'].itemconfig(self.traffic_light.ovals[canvas_name]['red'], fill="red")
         if self.traffic_light.canvases[canvas_name]['with_yellow_color']:
@@ -138,7 +138,6 @@ class YellowState(State):
         self.traffic_light = traffic_light
 
     def handle_request(self, canvas_name):
-        print('Wait for turning traffic light to red...')
         self.traffic_light.canvases[canvas_name]['state'] = 'yellow'
         if self.traffic_light.canvases[canvas_name]['with_yellow_color']:
             self.traffic_light.canvases[canvas_name]['canvas'].itemconfig(self.traffic_light.ovals[canvas_name]['red'], fill="white")

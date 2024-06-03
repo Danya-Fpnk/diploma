@@ -1,6 +1,3 @@
-canvas:
-  width: 200
-  height: 200
 priority:
   car: 1
   motorcycle: 1
@@ -11,13 +8,6 @@ priority:
 models:
   car_west:
     video_source: video/straight_4.mp4
-    video_sources:
-      clear: video/straight_0.mp4
-      busy:
-        - video/straight_1.mp4
-        - video/straight_4.mp4
-        - video/straight_6.mp4
-        - video/straight_8.mp4
     places: [170, 325]
     buttons: {button_x: 5, button_y: 360}
     traffic_light: {x: 380, y: 325, width: 70, height: 190, oriented: 'west_east_straight'}
