@@ -1,13 +1,10 @@
 import time
-from datetime import datetime
-import random
 
 import cv2
 import numpy as np
 from ultralytics import YOLO
 
 from model import class_names
-import yaml
 
 from video_utils import get_masked_frame
 

@@ -3,6 +3,7 @@ import tkinter
 from PIL import Image, ImageTk
 import time
 
+from model import class_names
 from traffic_light import TrafficLight
 from traffic_manager import manage_traffic_light
 from traffic_stats_utils import reset_objects_in_areas_stats, merge_stats
@@ -16,7 +17,9 @@ class Simulation:
         self.window.title(window_title)
         self.window.geometry("1800x1100")
 
-        self.priority = priority
+        self.priority = {
+            class_names.index(tracked_object): priority for tracked_object, priority in priority.items()
+        }
         self.start_time = start_time
         self.traffic_light = TrafficLight(self.window)
 

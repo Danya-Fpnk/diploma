@@ -1,3 +1,4 @@
+from model import class_names
 from real_time_video_capture import RealTimeVideoCapture
 from traffic_manager import manage_traffic_light
 from traffic_stats_utils import reset_objects_in_areas_stats, merge_stats
@@ -6,7 +7,9 @@ from traffic_stats_utils import reset_objects_in_areas_stats, merge_stats
 class ProductionTrafficManagerApp:
     def __init__(self, config, priority, start_time):
         self.config = config
-        self.priority = priority
+        self.priority = {
+            class_names.index(tracked_object): priority for tracked_object, priority in priority.items()
+        }
         self.start_time = start_time
 
         self.traffic_lights = None
