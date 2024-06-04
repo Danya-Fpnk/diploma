@@ -23,7 +23,7 @@ def calculate_priority(current_unixtime, objects, priority):
     return total_priority
 
 
-def analyze_results(objects_in_areas_stats, priority):
+def analyze_ojects_stats(objects_in_areas_stats, priority):
     current_unixtime = int(time.time())
     direction_priorities = {
         direction: calculate_priority(current_unixtime, objects, priority)

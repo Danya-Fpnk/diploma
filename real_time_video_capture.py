@@ -6,18 +6,18 @@ from ultralytics import YOLO
 
 from model import class_names
 
-from video_utils import get_masked_frame
+from video_utils import add_mask_to_frame
 
 
 class RealTimeVideoCapture:
-    def __init__(self, video_source, video_sources, tracked_objects, speed=5):
+    def __init__(self, video_source, video_sources, video_areas, tracked_objects, speed=5):
         self.video_source = video_source
         self.vid = cv2.VideoCapture(video_source)
         self.video_sources = video_sources
         if not self.vid.isOpened():
             raise ValueError("Unable to open video source", video_source)
 
-        self.video_areas = {key: np.array(value, np.int32) for key, value in video_areas[video_source].items()}
+        self.video_areas = {key: np.array(value, np.int32) for key, value in video_areas.items()}
 
         self.last_frame = None
         self.is_last_frame = False
@@ -83,7 +83,7 @@ class RealTimeVideoCapture:
     def analyze_objects(self):
         ret, frame = self.last_frame
 
-        masked_frame, self.mask = get_masked_frame(
+        masked_frame, self.mask = add_mask_to_frame(
             self.mask,
             frame,
             self.dilation_size,

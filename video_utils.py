@@ -8,7 +8,7 @@ def dilate_polygon(polygon, dilation_size):
     return dilated_polygon
 
 
-def get_masked_frame(mask, frame, dilation_size, video_areas):
+def add_mask_to_frame(mask, frame, dilation_size, video_areas):
     if mask is None:
         mask = np.zeros_like(frame)
         for area_key in video_areas.keys():

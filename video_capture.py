@@ -9,7 +9,7 @@ from ultralytics import YOLO
 from model import class_names
 import yaml
 
-from video_utils import get_masked_frame
+from video_utils import add_mask_to_frame
 
 
 def load_video_areas(file_path):
@@ -80,7 +80,7 @@ class VideoCapture:
 
         return frame
 
-    def draw_using_yolo_model(self, masked_frame, frame):
+    def analyze_using_yolo_model(self, masked_frame, frame):
         results = self.model.track(masked_frame, classes=self.tracked_classes, imgsz=640, show=False, persist=True)
 
         detect_unixtime = int(time.time())
@@ -120,21 +120,21 @@ class VideoCapture:
                         # cls_value['detect_time'].pop(track_id, None)
         return frame
 
-    def analyze_objects(self):
+    def analyze_frame(self):
         frame = self.last_frame
 
-        masked_frame, self.mask = get_masked_frame(
+        masked_frame, self.mask = add_mask_to_frame(
             self.mask,
             frame,
             self.dilation_size,
             self.video_areas
         )
 
-        frame = self.draw_using_yolo_model(masked_frame, frame)
+        frame = self.analyze_using_yolo_model(masked_frame, frame)
 
         frame = self.draw_waiting_areas(frame)
 
-        return cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        return cv2.cvtColor(frame, cv2.COLOR_BGR2RGB), self.objects_in_areas_stats
 
     def get_random_video_source(self, video_type):
         if video_type not in self.video_sources:

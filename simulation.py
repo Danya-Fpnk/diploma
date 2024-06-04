@@ -25,7 +25,7 @@ class Simulation:
 
         self.min_change_time = 5
 
-        self.models = self.create_models(self.config['models'])
+        self.models = self.create_models(config['models'])
         self.canvas_width = self.config['canvas']['width']
         self.canvas_height = self.config['canvas']['height']
         self.stopwatch_label = tkinter.Label(self.window, text="00:00:00", fg="black", font="Verdana 30 bold")
@@ -47,7 +47,7 @@ class Simulation:
             self.canvases[model_key] = canvas
         self.photos = {}
         self.delay = 30
-        self.update_video_frame()
+        self.update_simulation()
         self.window.mainloop()
 
     def create_models(self, models_config):
@@ -71,9 +71,9 @@ class Simulation:
             models[model_name] = model
         return models
 
-    def update_video_frame(self):
-        current_time = time.time() - self.start_time
-        hrs, mins, sec = int(current_time // 3600), int((current_time % 3600) // 60), int(current_time % 60)
+    def update_simulation(self):
+        current_time_execution = time.time() - self.start_time
+        hrs, mins, sec = int(current_time_execution // 3600), int((current_time_execution % 3600) // 60), int(current_time_execution % 60)
         self.stopwatch_label.config(text="{:02d}:{:02d}:{:02d}".format(hrs, mins, sec))
 
         self.objects_in_areas_stats = reset_objects_in_areas_stats()
@@ -81,13 +81,13 @@ class Simulation:
         for model_name, model in self.models.items():
             model['video'].get_frame()
             if model['video'].is_last_frame is False:
-                frame = model['video'].analyze_objects()
+                frame = model['video'].analyze_frame()
                 image = Image.fromarray(frame)
                 resized_image = image.resize((self.canvas_width, self.canvas_height))
 
-                photo = ImageTk.PhotoImage(resized_image)
-                self.canvases[model_name].create_image(0, 0, image=photo, anchor=tkinter.NW)
-                self.photos[model_name] = photo
+                frame = ImageTk.PhotoImage(resized_image)
+                self.canvases[model_name].create_image(0, 0, image=frame, anchor=tkinter.NW)
+                self.photos[model_name] = frame
 
             print(f'Detected objects in {model_name} model:', model['video'].objects_in_areas_stats)
             self.objects_in_areas_stats = merge_stats(
