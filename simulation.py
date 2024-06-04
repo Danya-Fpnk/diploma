@@ -81,7 +81,7 @@ class Simulation:
         for model_name, model in self.models.items():
             model['video'].get_frame()
             if model['video'].is_last_frame is False:
-                frame = model['video'].analyze_frame()
+                frame, objects_in_areas_stats = model['video'].analyze_frame()
                 image = Image.fromarray(frame)
                 resized_image = image.resize((self.canvas_width, self.canvas_height))
 
@@ -111,7 +111,7 @@ class Simulation:
 
         self.time_to_access_changing_traffic_signal.config(text=time_str)
 
-        self.window.after(self.delay, self.update_video_frame)
+        self.window.after(self.delay, self.update_simulation)
 
     def add_video_change_buttons(self, model_name, buttons_settings, video_sources):
         button_x = buttons_settings['button_x']
