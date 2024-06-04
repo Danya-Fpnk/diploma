@@ -72,6 +72,11 @@ class TrafficLight():
             else:
                 self.red_state.handle_request(canvas_name)
 
+    def update_models_video_sources(self, application, oriented_to_green):
+        for canvas_name in self.canvases.keys():
+            video_type = ("clear" if self.canvases[canvas_name]['oriented'] == oriented_to_green else "busy")
+            application.change_video_source(self.canvases[canvas_name]['model_name'], video_type=video_type)
+
     def _change_colors(self, oriented_to_green, application, blink_cnt):
         for canvas_name in self.canvases.keys():
             if self.canvases[canvas_name]['oriented'] == oriented_to_green:
@@ -97,9 +102,7 @@ class TrafficLight():
             self.window.after(500, self._change_colors, oriented_to_green, application, blink_cnt + 1)
         else:
             self.window.after(1, self.handle_requests, oriented_to_green)
-            for canvas_name in self.canvases.keys():
-                video_type = ("clear" if self.canvases[canvas_name]['oriented'] == oriented_to_green else "busy")
-                application.change_video_source(self.canvases[canvas_name]['model_name'], video_type=video_type)
+            self.window.after(3000, self.update_models_video_sources, application, oriented_to_green)
 
     def change_colors(self, oriented_to_green, application, blink_cnt=1,):
         self.last_status_changed_at = datetime.now()

@@ -81,7 +81,11 @@ class VideoCapture:
         return frame
 
     def analyze_using_yolo_model(self, masked_frame, frame):
-        results = self.model.track(masked_frame, classes=self.tracked_classes, imgsz=640, show=False, persist=True)
+        try:
+            results = self.model.track(masked_frame, classes=self.tracked_classes, imgsz=640, show=False, persist=True)
+        except Exception as e:
+            print(e)
+            self.analyze_using_yolo_model(masked_frame, frame)
 
         detect_unixtime = int(time.time())
         if results[0].boxes.id is not None:
